@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spark — Constructivist activity generator for teachers</title>
+<meta name="description" content="Turn any concept into an inquiry-based, 5E classroom activity built around a compelling driving question — tailored to your learners' age." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fbf7ef; --ink:#3a2f27; --muted:#8a7c6d; --card:#ffffff;
+    --border:#ece2d4; --primary:#d2683a; --spark:#e8a13c;
+    --engage:#e07a4f; --explore:#4fa87a; --explain:#5b86c9; --elaborate:#9166c9; --evaluate:#c9a24f;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:"Inter",system-ui,sans-serif; color:var(--ink);
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(1200px 600px at 8% -12%, rgba(232,161,60,.28), transparent 60%),
+      radial-gradient(1000px 520px at 100% -6%, rgba(210,104,58,.22), transparent 60%);
+    background-attachment:fixed; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif; letter-spacing:-.01em; line-height:1.12; margin:0}
+  a{color:var(--primary)}
+  .wrap{max-width:960px; margin:0 auto; padding:0 22px}
+  header.top{display:flex; align-items:center; justify-content:space-between; padding:26px 0 6px}
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{height:38px; width:38px; border-radius:12px; display:grid; place-items:center; color:#fff;
+    background:linear-gradient(135deg,var(--primary),var(--spark)); box-shadow:0 4px 14px -6px rgba(210,104,58,.6)}
+  .logo svg{height:20px;width:20px}
+  .brand b{font-family:"Fraunces",serif; font-weight:600; font-size:21px}
+  .ghost{background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;padding:8px 12px;border-radius:10px;display:inline-flex;align-items:center;gap:6px}
+  .ghost:hover{background:rgba(0,0,0,.04); color:var(--ink)}
+  main{padding-bottom:80px}
+  /* hero */
+  .hero{text-align:center; max-width:680px; margin:28px auto 0}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:#f1e7d7;color:#6a5a48;border-radius:999px;
+    padding:6px 14px;font-size:12.5px;font-weight:600;margin-bottom:18px}
+  .hero h1{font-size:clamp(38px,6vw,60px); font-weight:600}
+  .hero h1 .grad{font-style:italic; background:linear-gradient(90deg,var(--primary),var(--spark));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{font-size:18px;color:var(--muted);margin:16px 0 0}
+  /* form */
+  form.gen{margin:34px 0 0; background:var(--card); border:1px solid var(--border); border-radius:22px;
+    padding:26px; box-shadow:0 24px 60px -40px rgba(90,50,20,.4)}
+  .field{margin-bottom:18px}
+  .field:last-of-type{margin-bottom:0}
+  label{display:block;font-size:13.5px;font-weight:600;margin-bottom:7px}
+  label .opt{color:var(--muted);font-weight:400}
+  label .req{color:var(--primary)}
+  input[type=text],textarea,select{
+    width:100%; font:inherit; font-size:15.5px; color:var(--ink); background:#fff;
+    border:1px solid var(--border); border-radius:12px; padding:12px 14px; outline:none; transition:border-color .15s,box-shadow .15s}
+  input:focus,textarea:focus,select:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(210,104,58,.14)}
+  textarea{min-height:76px; resize:vertical}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  button.cta{width:100%; margin-top:22px; border:none; cursor:pointer; color:#fff; font:inherit; font-weight:600;
+    font-size:16px; height:52px; border-radius:14px; display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    background:linear-gradient(135deg,var(--primary),var(--spark)); box-shadow:0 12px 30px -14px rgba(210,104,58,.75)}
+  button.cta:hover{filter:brightness(1.03)}
+  button.cta:disabled{opacity:.65;cursor:default}
+  /* examples */
+  .examples{margin-top:34px}
+  .examples .lbl{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{text-align:left;border:1px solid var(--border);background:var(--card);border-radius:999px;
+    padding:9px 15px;font:inherit;font-size:14px;cursor:pointer;transition:border-color .15s,background .15s}
+  .chip:hover{border-color:var(--primary); background:#faf3ea}
+  .chip .age{color:var(--muted)}
+  /* meta / key notice */
+  .keybar{margin-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;font-size:13px;color:var(--muted)}
+  .badge-mode{display:inline-flex;align-items:center;gap:6px;background:#f1e7d7;border-radius:999px;padding:5px 12px;font-weight:600;color:#6a5a48}
+  .badge-mode.ai{background:#e3efe6;color:#2f7a4f}
+  /* activity card */
+  .card-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end;margin-bottom:20px}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:500;
+    cursor:pointer;padding:9px 14px;border-radius:11px;display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:#faf3ea;border-color:var(--primary)}
+  .btn.primary{background:linear-gradient(135deg,var(--primary),var(--spark));color:#fff;border:none}
+  .btn:disabled{opacity:.6;cursor:default}
+  .hero-q{border-radius:24px;padding:34px;border:1px solid var(--border);
+    background:linear-gradient(135deg,#fbf1e4,#f7e6da); box-shadow:0 20px 50px -40px rgba(90,50,20,.5)}
+  .hero-q .kicker{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--primary)}
+  .hero-q h1{font-size:clamp(28px,4.4vw,44px);font-weight:600;margin-top:12px}
+  .hero-q .facts{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:var(--muted);align-items:center}
+  .hero-q .facts .title{color:var(--ink);font-weight:600}
+  .hero-q .facts .f{display:inline-flex;align-items:center;gap:6px}
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:720px){.info-grid{grid-template-columns:1fr}}
+  .block{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px}
+  .block .h{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .block p{margin:0;font-size:14.5px}
+  .vocab{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+  .vocab li{font-size:12.5px;font-weight:600;background:#f1e7d7;color:#6a5a48;border-radius:8px;padding:4px 9px}
+  .mats{margin:0;padding:0;list-style:none;font-size:14px}
+  .mats li{display:flex;gap:8px}.mats li::before{content:"•";color:var(--primary)}
+  .phases{margin-top:30px}
+  .phases h2{font-size:26px;font-weight:600;margin-bottom:16px}
+  .phase{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 24px;margin-bottom:15px;
+    box-shadow:0 10px 30px -26px rgba(90,50,20,.5)}
+  .phase .top{display:flex;gap:16px;align-items:flex-start}
+  .pico{flex:0 0 auto;height:44px;width:44px;border-radius:12px;display:grid;place-items:center;color:#fff}
+  .phase .body{flex:1;min-width:0}
+  .phase .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+  .phase .step{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .phase h3{font-size:20px;font-weight:600;margin-top:2px}
+  .phase .time{font-size:13.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .phase .instr{margin:13px 0 0;font-size:15px;white-space:pre-wrap;color:#4a3f36}
+  .phase .pm{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .phase .pm .t{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .phase .pm span.m{font-size:12.5px;border:1px solid var(--border);background:var(--bg);border-radius:8px;padding:3px 9px}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 0 34px}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(40,28,18,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--card);border-radius:20px;max-width:520px;width:100%;padding:26px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5);max-height:90vh;overflow:auto}
+  .modal h2{font-size:22px;margin-bottom:6px}
+  .modal p.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .modal .seg{display:flex;gap:8px;margin-bottom:16px}
+  .modal .seg button{flex:1;border:1px solid var(--border);background:#fff;font:inherit;font-size:14px;padding:9px;border-radius:10px;cursor:pointer;font-weight:600}
+  .modal .seg button.on{background:#faf3ea;border-color:var(--primary);color:var(--primary)}
+  .modal .note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .modal .actions{display:flex;gap:9px;justify-content:flex-end;margin-top:20px}
+  .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);
+    border-left:4px solid var(--primary);border-radius:12px;padding:13px 18px;font-size:14px;font-weight:500;
+    box-shadow:0 14px 40px -18px rgba(0,0,0,.4);z-index:60;display:none;max-width:90vw}
+  .toast.err{border-left-color:#c9463a;color:#b03a2e}
+  .toast.show{display:block;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+  .spin{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+  .hidden{display:none!important}
+  @media print{
+    body{background:#fff!important}
+    .no-print{display:none!important}
+    .phase,.block,.hero-q{break-inside:avoid;box-shadow:none}
+    main{padding-bottom:0}
+  }
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<header class="top wrap no-print">
+  <div class="brand">
+    <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4L12 3z"/><path d="M19 14l.8 2 .2.8-2 .8L17 20l-.8-2-.2-.8 2-.8L19 14z"/></svg></span>
+    <b>Spark</b>
+  </div>
+  <div>
+    <button class="ghost" id="settingsBtn" title="Set an API key for full AI generation">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      AI settings
+    </button>
+    <button class="ghost hidden" id="newBtn">← New activity</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- LANDING -->
+  <section id="landing">
+    <div class="hero">
+      <span class="pill">✦ Constructivist activity generator</span>
+      <h1>Turn any concept into a <span class="grad">spark of inquiry</span>.</h1>
+      <p>Enter a concept, choose an age, and get a ready-to-run 5E lesson built around one compelling driving question.</p>
+    </div>
+
+    <form class="gen" id="genForm" autocomplete="off">
+      <div class="field">
+        <label for="concept">What concept do you want to teach? <span class="req">*</span></label>
+        <textarea id="concept" placeholder="e.g. Properties of a triangle — the triangle inequality"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="age">Age or grade level <span class="req">*</span></label>
+          <input type="text" id="age" placeholder="e.g. Grade 6, or age 11" />
+        </div>
+        <div class="field">
+          <label for="subject">Subject area <span class="opt">(optional)</span></label>
+          <input type="text" id="subject" placeholder="e.g. Math, Science, History" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="duration">Class duration <span class="opt">(optional)</span></label>
+        <input type="text" id="duration" placeholder="e.g. 45 minutes, one 60-min lesson" />
+      </div>
+      <button type="submit" class="cta" id="genBtn">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4L12 3z"/></svg>
+        <span id="genLabel">Generate activity</span>
+      </button>
+    </form>
+
+    <div class="keybar no-print" id="keybar"></div>
+
+    <div class="examples">
+      <div class="lbl">Try an example</div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <!-- ACTIVITY -->
+  <section id="activity" class="hidden">
+    <div class="card-actions no-print">
+      <button class="btn" id="adjustBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Adjust age</button>
+      <button class="btn" id="regenBtn"><svg id="regenIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Regenerate</button>
+      <button class="btn primary" id="printBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Print / PDF</button>
+    </div>
+    <div id="activityBody"></div>
+  </section>
+</main>
+
+<footer>Made for teachers. Every activity is a starting point — trust your judgment in the classroom.</footer>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2>AI generation settings</h2>
+    <p class="sub">Spark works out of the box using its built-in activity library. Add your own API key to unlock full AI generation for <em>any</em> concept. Your key is stored only in this browser and sent directly to the provider — never to any Spark server.</p>
+    <div class="seg" id="providerSeg">
+      <button data-p="anthropic" class="on">Anthropic (Claude)</button>
+      <button data-p="openai">OpenAI</button>
+    </div>
+    <div class="field">
+      <label for="apiKey">API key</label>
+      <input type="text" id="apiKey" placeholder="sk-..." />
+      <div class="note" id="keyNote"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="clearKey">Remove key</button>
+      <button class="btn primary" id="saveKey">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- tiny helpers ---------- */
+const $ = s => document.querySelector(s);
+const store = {
+  get k(){ try{return JSON.parse(localStorage.getItem("spark_ai")||"null")}catch(e){return null} },
+  set k(v){ v? localStorage.setItem("spark_ai",JSON.stringify(v)) : localStorage.removeItem("spark_ai") }
+};
+function toast(msg,isErr){
+  const t=$("#toast"); t.textContent=msg; t.className="toast show"+(isErr?" err":"");
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className="toast",4200);
+}
+function ageBand(s){
+  s=s||""; let n=null;
+  const ageM=s.match(/age\s*(\d+)/i);
+  const gradeM=s.match(/grade\s*(\d+)/i);
+  if(ageM){ n=parseInt(ageM[1],10); }              // explicit age wins
+  else if(gradeM){ n=parseInt(gradeM[1],10)+5; }   // grade -> approx age
+  else { const m=s.match(/\d+/); if(m){ let x=parseInt(m[0],10); n=(x<=12? x+5 : x); } } // bare number: assume grade if <=12
+  if(n==null) return {key:"mid",label:"Ages 11–14"};
+  if(n<=7) return {key:"early",label:"Ages 4–7"};
+  if(n<=11) return {key:"elem",label:"Ages 8–11"};
+  if(n<=14) return {key:"mid",label:"Ages 12–14"};
+  return {key:"high",label:"Ages 15+"};
+}
+
+/* ---------- 5E phase chrome ---------- */
+const PHASE_META=[
+  {key:"engage",step:"1 · Engage",desc:"Hook & surface the question",color:"var(--engage)",icon:'<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>'},
+  {key:"explore",step:"2 · Explore",desc:"Hands-on investigation",color:"var(--explore)",icon:'<path d="M10 2v7.31"/><path d="M14 9.3V2"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/>'},
+  {key:"explain",step:"3 · Explain",desc:"Articulate & formalize",color:"var(--explain)",icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {key:"elaborate",step:"4 · Elaborate",desc:"Extend & apply",color:"var(--elaborate)",icon:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>'},
+  {key:"evaluate",step:"5 · Evaluate",desc:"Check for understanding",color:"var(--evaluate)",icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'}
+];
+const ico=(p,w=16)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+
+/* ---------- render an activity object ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function renderActivity(a){
+  const facts=`
+    <div class="facts">
+      <span class="title">${esc(a.activityTitle)}</span>
+      <span class="f">${ico('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',15)} ${esc(a.ageBand)}</span>
+      <span class="f">${ico('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',15)} ~${esc(a.totalMinutes)} min</span>
+    </div>`;
+  const vocab=(a.keyVocabulary&&a.keyVocabulary.length)
+    ? `<ul class="vocab">${a.keyVocabulary.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`
+    : `<p style="color:var(--muted);font-style:italic;font-size:14px">Age-appropriate — no formal terms.</p>`;
+  const mats=(a.materialsList&&a.materialsList.length)
+    ? `<ul class="mats">${a.materialsList.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`
+    : `<p style="color:var(--muted);font-style:italic;font-size:14px">No materials needed.</p>`;
+  const phases=PHASE_META.map(pm=>{
+    const p=a[pm.key]||{}; const pmats=(p.materials&&p.materials.length)
+      ? `<div class="pm"><span class="t">Materials:</span>${p.materials.map(m=>`<span class="m">${esc(m)}</span>`).join("")}</div>`:"";
+    return `<div class="phase">
+      <div class="top">
+        <div class="pico" style="background:${pm.color}">${ico(pm.icon,20)}</div>
+        <div class="body">
+          <div class="head">
+            <div><div class="step">${pm.step} · ${pm.desc}</div><h3>${esc(p.title||"")}</h3></div>
+            <span class="time">${ico('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',14)} ${esc(p.estimatedMinutes||"—")} min</span>
+          </div>
+          <p class="instr">${esc(p.teacherInstructions||"")}</p>
+          ${pmats}
+        </div>
+      </div></div>`;
+  }).join("");
+  $("#activityBody").innerHTML=`
+    <section class="hero-q">
+      <div class="kicker">${ico('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',14)} Driving Question</div>
+      <h1>${esc(a.drivingQuestion)}</h1>${facts}
+    </section>
+    <div class="info-grid">
+      <div class="block"><div class="h">${ico('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',14)} Learning objective</div><p>${esc(a.learningObjective)}</p></div>
+      <div class="block"><div class="h">${ico('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',14)} Key vocabulary</div>${vocab}</div>
+      <div class="block"><div class="h">${ico('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',14)} Materials</div>${mats}</div>
+    </div>
+    <div class="phases"><h2>The 5E Lesson</h2>${phases}</div>`;
+  $("#landing").classList.add("hidden");
+  $("#activity").classList.remove("hidden");
+  $("#newBtn").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* =====================================================================
+   CURATED LIBRARY — fully authored, ready-to-run activities
+   ===================================================================== */
+const LIBRARY=[
+  {
+    match:["triangle inequality","three side","3 side","properties of a triangle","triangle"],
+    activityTitle:"The Broken Ruler Triangle Challenge",
+    drivingQuestion:"Can any three side lengths make a triangle?",
+    ageBand:"Grade 6 (age 11)", totalMinutes:50,
+    learningObjective:"Students will be able to predict and justify whether three given side lengths can form a triangle, discovering the triangle inequality rule.",
+    keyVocabulary:["side length","triangle inequality","conjecture","rule / generalization"],
+    materialsList:["Uncooked spaghetti or paper strips","Rulers","Recording table (handout)","Scissors"],
+    engage:{title:"The impossible triangle",estimatedMinutes:7,materials:["3 pre-cut strips: 3 cm, 4 cm, 10 cm"],
+      teacherInstructions:"Hold up three strips (3 cm, 4 cm, 10 cm) and say: \"I need a triangle from exactly these three pieces — no cutting.\" Try to build it in front of the class; the short sides won't meet. Ask: \"Is this just me being clumsy, or is something going on? Can ANY three lengths make a triangle?\" Post the driving question."},
+    explore:{title:"Build, test, record",estimatedMinutes:18,materials:["Spaghetti/strips","Rulers","Recording table"],
+      teacherInstructions:"In pairs, students cut pieces to given length-sets (mix of \"works\" and \"fails\"), attempt to form a closed triangle, and record Yes/No plus the three lengths in a table. Give at least 6 sets, e.g. (5,5,5),(4,4,9),(6,8,10),(2,3,8),(7,7,3),(5,6,10). Circulate; do NOT reveal the rule."},
+    explain:{title:"Find the pattern",estimatedMinutes:12,materials:["Class data table"],
+      teacherInstructions:"Collect results on the board. Ask groups: \"Look only at the sets that WORKED. What do the two shorter sides do compared to the longest?\" Guide them to articulate: the two shorter sides added together must be longer than the longest side. Introduce the term triangle inequality and the notation a + b > c."},
+    elaborate:{title:"Design a fail",estimatedMinutes:8,materials:[],
+      teacherInstructions:"Challenge: \"Give me one set that just BARELY works and one that just barely fails.\" Students test the boundary (e.g. 5,5,10 — degenerate) and discuss what happens exactly when a+b=c. Extend: given two sides of 6 and 9, what whole-number lengths can the third side be?"},
+    evaluate:{title:"Exit ticket",estimatedMinutes:5,materials:["Exit slip"],
+      teacherInstructions:"On a slip, each student answers: (1) Can 4, 6, and 11 form a triangle? Show why. (2) Two sides are 8 and 5 — give a third length that works and one that doesn't. Collect as a quick check for the rule."}
+  },
+  {
+    match:["seasons","why do we have seasons","tilt","axial"],
+    activityTitle:"Chasing the Sun's Angle",
+    drivingQuestion:"Why is it hot in summer and cold in winter — is Earth just closer to the Sun?",
+    ageBand:"Grade 4 (age 9)", totalMinutes:50,
+    learningObjective:"Students will be able to explain that seasons are caused by Earth's tilt changing how directly sunlight hits a place, not by distance from the Sun.",
+    keyVocabulary:["tilt","direct vs. slanted light","axis","season"],
+    materialsList:["Flashlight or lamp","Globe or ball + skewer","Graph paper","Thermometers (optional)"],
+    engage:{title:"The distance trap",estimatedMinutes:8,materials:["Globe","Flashlight"],
+      teacherInstructions:"Ask: \"Who thinks summer happens because Earth moves closer to the Sun?\" Take a vote. Then reveal: when it's summer in the US, it's winter in Australia — at the SAME time, same distance. \"So distance can't be the whole story. What IS different?\" Post the driving question."},
+    explore:{title:"Direct vs. slanted light",estimatedMinutes:16,materials:["Flashlight","Graph paper"],
+      teacherInstructions:"In groups, shine a flashlight straight down onto graph paper, then at a low slant. Trace the lit patch each time and count the squares covered. Record: which spreads the same light over MORE squares? Which squares are brighter? Connect brighter/concentrated = warmer."},
+    explain:{title:"Tilt tells the story",estimatedMinutes:14,materials:["Globe + skewer"],
+      teacherInstructions:"Using a tilted globe orbiting a lamp, show that the tilt makes sunlight hit the top half directly in June (summer) and slanted in December (winter). Students explain in their own words, then you formalize: Earth's axis is tilted; the hemisphere tilted toward the Sun gets direct light = summer."},
+    elaborate:{title:"Where on Earth?",estimatedMinutes:7,materials:["Globe"],
+      teacherInstructions:"Ask: \"Using tilt, why is it always hot near the equator and cold at the poles?\" Groups reason with the globe and light. Extend to why summer days are longer."},
+    evaluate:{title:"Explain to a friend",estimatedMinutes:5,materials:["Half-sheet"],
+      teacherInstructions:"Students write a 3-sentence note to a friend who thinks seasons come from distance, using the words tilt and direct light to correct them. Quick read for the misconception."}
+  },
+  {
+    match:["fair test","variable","controlled experiment","fair experiment"],
+    activityTitle:"The Suspicious Science Claim",
+    drivingQuestion:"What makes an experiment a fair test — and how can two people get different answers to the same question?",
+    ageBand:"Grade 5 (age 10)", totalMinutes:45,
+    learningObjective:"Students will be able to design a fair test by changing one variable while keeping all others the same.",
+    keyVocabulary:["variable","fair test","control","keep-the-same"],
+    materialsList:["Paper for paper planes","Ramps + toy cars (optional)","Recording sheet","Tape/rulers"],
+    engage:{title:"Two rival claims",estimatedMinutes:7,materials:["2 paper planes"],
+      teacherInstructions:"Show two paper planes and claim: \"Plane A flies farther than Plane B — proof that pointy noses are best.\" Then reveal you threw A much harder and from higher up. Ask: \"Do we actually KNOW noses matter? What went wrong?\" Post the driving question."},
+    explore:{title:"Break the test on purpose",estimatedMinutes:15,materials:["Paper planes","Rulers"],
+      teacherInstructions:"Groups test which paper affects distance, but you secretly assign each group a DIFFERENT sloppy method (change thrower, height, and paper all at once). Compare class results — they wildly disagree. Students record what each group changed."},
+    explain:{title:"One thing at a time",estimatedMinutes:13,materials:["Recording sheet"],
+      teacherInstructions:"Discuss why results disagreed. Guide to the rule: change only ONE thing (the variable you're testing) and keep everything else the same. Introduce variable, control, and fair test. Redesign the plane test together with a keep-the-same list."},
+    elaborate:{title:"Fix a flawed test",estimatedMinutes:6,materials:["Flawed-test cards"],
+      teacherInstructions:"Give each group a card describing a flawed experiment (e.g. \"Does plant food help? We gave the big plant food and the small one none.\"). They identify what's unfair and how to fix it."},
+    evaluate:{title:"Spot the flaw",estimatedMinutes:4,materials:["Exit slip"],
+      teacherInstructions:"Exit slip: \"A student says warm water dissolves sugar faster, but they also stirred the warm cup more. Is this a fair test? What must they keep the same?\""}
+  },
+  {
+    match:["supply and demand","supply & demand","price","market","economics"],
+    activityTitle:"The Classroom Market Crash",
+    drivingQuestion:"Who actually decides the price of something — the seller, the buyer, or neither?",
+    ageBand:"Grade 10 (age 15)", totalMinutes:55,
+    learningObjective:"Students will be able to explain how the interaction of supply and demand determines equilibrium price, using data from a simulated market.",
+    keyVocabulary:["supply","demand","equilibrium","shortage","surplus"],
+    materialsList:["Role cards (buyers/sellers)","Play money or tokens","Whiteboard for price log","Graph paper / plotting tool"],
+    engage:{title:"Name your price",estimatedMinutes:8,materials:["A single desirable item"],
+      teacherInstructions:"Auction one genuinely wanted item (front-row seat pass, homework pass). Watch the price climb. Then say: \"If I had 30 of these, what happens to the price?\" Provoke the tension between what sellers want and what buyers will pay. Post the driving question."},
+    explore:{title:"Run a live market",estimatedMinutes:20,materials:["Role cards","Tokens"],
+      teacherInstructions:"Assign buyers a maximum price and sellers a minimum price on secret cards. Run several trading rounds; students negotiate deals and you log every agreed price on the board. Repeat, then add more sellers (increase supply) and observe."},
+    explain:{title:"Where prices settle",estimatedMinutes:15,materials:["Price log","Graph paper"],
+      teacherInstructions:"Plot the logged prices; they cluster around a value. Have students articulate why deals above buyers' max or below sellers' min never happened. Formalize supply, demand, and equilibrium — the price where quantity wanted equals quantity offered. Define shortage and surplus."},
+    elaborate:{title:"Shock the market",estimatedMinutes:8,materials:[],
+      teacherInstructions:"Introduce a shock (e.g. a shortage: half the sellers leave; or a demand spike). Students predict, then re-run one round to test the price movement and explain the shift using the model."},
+    evaluate:{title:"Predict & justify",estimatedMinutes:4,materials:["Exit slip"],
+      teacherInstructions:"Exit slip: \"A frost destroys half the coffee crop. Using supply and demand, predict what happens to the price and explain why in 2–3 sentences.\""}
+  },
+  {
+    match:["poem","poetry","what makes a poem","language arts"],
+    activityTitle:"Is This a Poem?",
+    drivingQuestion:"What makes a poem feel like a poem — and can a grocery list ever be one?",
+    ageBand:"Grade 3 (age 8)", totalMinutes:40,
+    learningObjective:"Students will be able to identify features that make writing feel like a poem (sound, line breaks, imagery, feeling) and use one to write their own.",
+    keyVocabulary:["line","rhythm","image","feeling"],
+    materialsList:["Short poems on cards","A real grocery list","Crayons/paper","Chart paper"],
+    engage:{title:"Poem or not?",estimatedMinutes:7,materials:["Poem cards","Grocery list"],
+      teacherInstructions:"Read aloud a tiny vivid poem, then read a plain grocery list in the same voice. Ask: \"Which one was a poem? How did you KNOW?\" Let kids blurt reasons. Post the driving question and keep a running list of their clues."},
+    explore:{title:"Sort the mystery texts",estimatedMinutes:12,materials:["Mixed text cards"],
+      teacherInstructions:"Groups get a stack of cards — some poems, some sentences, some lists — and sort them into \"feels like a poem\" and \"doesn't.\" They must whisper-argue and agree. Circulate and ask \"what made you put it there?\" Do not give the answer."},
+    explain:{title:"Our poem clues",estimatedMinutes:10,materials:["Chart paper"],
+      teacherInstructions:"Build a class chart from their reasons. Nudge toward: poems paint a picture (image), can have rhythm or sound, use short lines, and give a feeling. Name these gently. Show how the grocery list COULD become a poem by adding an image and line breaks."},
+    elaborate:{title:"Turn something plain into a poem",estimatedMinutes:8,materials:["Paper","Crayons"],
+      teacherInstructions:"Each child takes a boring sentence (\"I ate breakfast\") and turns it into a 3-line mini-poem using one clue from the chart (an image or a sound). Volunteers share."},
+    evaluate:{title:"Thumbs & tell",estimatedMinutes:3,materials:[],
+      teacherInstructions:"Read two short texts; students thumbs-up if it's a poem and name ONE clue that tells them. Quick check of the features."}
+  },
+  {
+    match:["moon phases","phases of the moon","why does the moon change","lunar"],
+    activityTitle:"The Moon's Changing Face",
+    drivingQuestion:"Why does the Moon change shape — is something covering it up?",
+    ageBand:"Grade 5 (age 10)", totalMinutes:45,
+    learningObjective:"Students will be able to model how the Moon's phases result from sunlight hitting it as it orbits Earth, not from a shadow covering it.",
+    keyVocabulary:["phase","orbit","reflect","crescent / gibbous"],
+    materialsList:["Foam balls on sticks","A bright lamp","Darkenable room","Phase recording circle"],
+    engage:{title:"The shrinking Moon myth",estimatedMinutes:7,materials:["Moon photos"],
+      teacherInstructions:"Show a sequence of Moon photos across a month. Offer a wrong idea: \"Maybe Earth's shadow eats the Moon a bit each night.\" Ask: \"Does that hold up? Then why is a crescent CURVED the way it is?\" Post the driving question."},
+    explore:{title:"Model it in the dark",estimatedMinutes:16,materials:["Foam ball","Lamp"],
+      teacherInstructions:"Each student holds a ball (Moon) at arm's length and slowly turns in place with a single lamp (Sun) lighting the room. They observe how the lit part they can see changes — full, half, crescent — and sketch what they see at 8 positions."},
+    explain:{title:"It's about the angle of light",estimatedMinutes:14,materials:["Recording circle"],
+      teacherInstructions:"Students compare sketches. Guide them: the Moon is always half-lit by the Sun; we just see different amounts as it orbits. Rule out the shadow idea (shadow only causes rare eclipses). Introduce phase, orbit, reflect, and phase names."},
+    elaborate:{title:"Predict the next phase",estimatedMinutes:5,materials:["Calendar"],
+      teacherInstructions:"Given tonight's phase, groups predict what it will look like in one week and justify using their model. Connect to why we see the same face of the Moon."},
+    evaluate:{title:"Draw & explain",estimatedMinutes:3,materials:["Exit slip"],
+      teacherInstructions:"Exit slip: draw a crescent Moon and write one sentence explaining what causes it, using the words orbit and light."}
+  }
+];
+function libLookup(concept){
+  const c=(concept||"").toLowerCase();
+  let best=null,bestScore=0;
+  for(const a of LIBRARY){
+    let s=0; for(const m of a.match){ if(c.includes(m)) s=Math.max(s,m.length); }
+    if(s>bestScore){bestScore=s;best=a;}
+  }
+  return bestScore>0?best:null;
+}
+
+/* =====================================================================
+   TEMPLATE GENERATOR — for concepts not in the library (offline, no key)
+   Produces a genuine 5E scaffold adapted to the age band.
+   ===================================================================== */
+function titleCase(s){return (s||"").trim().replace(/\s+/g," ")}
+function templateActivity(concept,ageStr,subject){
+  const band=ageBand(ageStr);
+  const C=titleCase(concept);
+  const cShort=C.length>60?C.slice(0,57)+"…":C;
+  const byBand={
+    early:{verbs:"touch, sort, act out, and draw",record:"draw pictures or place real objects",think:"tell a partner what they noticed",tools:"real objects, pictures, movement, and story",lang:"very simple words, no symbols",tmin:[6,12,9,6,3],obj:"explore and talk about"},
+    elem:{verbs:"build, test, and record in a simple table",record:"fill in a picture-and-words table",think:"look for a pattern across their results",tools:"hands-on materials and a recording sheet",lang:"everyday words with one or two new terms",tmin:[7,16,12,7,4],obj:"discover a pattern in"},
+    mid:{verbs:"measure, collect data, and look for a rule",record:"organize measurements in a data table",think:"state a rule in their own words and test it",tools:"measurement tools, data tables, and diagrams",lang:"proper vocabulary and early symbols",tmin:[8,18,13,8,5],obj:"investigate and generalize"},
+    high:{verbs:"investigate, model, and justify",record:"organize evidence and reasoning",think:"form and defend a general claim or proof",tools:"data, models, notation, and structured argument",lang:"formal vocabulary, notation, and justification",tmin:[8,20,15,8,5],obj:"reason formally about"}
+  }[band.key];
+  const t=byBand.tmin, total=t.reduce((a,b)=>a+b,0);
+  const subj=subject?` (${titleCase(subject)})`:"";
+  const dq=`What is really going on with ${cShort.toLowerCase().replace(/\.$/,"")} — and how could we find out for ourselves?`;
+  return {
+    activityTitle:`Investigating: ${cShort}`,
+    drivingQuestion:dq,
+    ageBand:`${ageStr} · ${band.label}`,
+    totalMinutes:total,
+    learningObjective:`Students will be able to ${byBand.obj} ${cShort.toLowerCase().replace(/\.$/,"")}${subj} by constructing their own understanding through hands-on inquiry.`,
+    keyVocabulary: band.key==="early"?[]:["(add the 2–4 key terms for this concept)","evidence","pattern / rule"],
+    materialsList:["Materials suited to the concept","Recording sheet or chart","Whiteboard for shared ideas"],
+    engage:{title:"Engage — surface the question",estimatedMinutes:t[0],materials:["A surprising example or demonstration"],
+      teacherInstructions:`Open with something puzzling about "${cShort}" that challenges what students expect — a demonstration, image, quick vote, or "what would happen if…?" that has no obvious answer. Draw out prior ideas (including wrong ones) and post the driving question: "${dq}" Tell students they will figure it out themselves, using ${byBand.tools}.`},
+    explore:{title:"Explore — hands-on investigation",estimatedMinutes:t[1],materials:["Hands-on materials","Recording sheet"],
+      teacherInstructions:`In pairs or small groups, students ${byBand.verbs} to investigate "${cShort}". Give them varied cases to try (some that work as expected and some that don't) and have them ${byBand.record}. Circulate and ask probing questions — do NOT tell them the answer yet. This is where students construct the idea from evidence.`},
+    explain:{title:"Explain — articulate & formalize",estimatedMinutes:t[2],materials:["Class chart / board"],
+      teacherInstructions:`Bring the class together. Have students ${byBand.think} FIRST, in their own words. Then formalize: introduce the correct concept, ${byBand.lang}, connecting each new term directly to what students observed. Address any misconceptions that surfaced in Explore.`},
+    elaborate:{title:"Elaborate — extend & apply",estimatedMinutes:t[3],materials:[],
+      teacherInstructions:`Give a new situation, harder case, or real-world example where students apply their new understanding of "${cShort}". Ask them to predict first, then check. This tests whether the idea transfers beyond the original activity.`},
+    evaluate:{title:"Evaluate — check for understanding",estimatedMinutes:t[4],materials:["Exit slip"],
+      teacherInstructions:`Quick check: an exit ticket or short performance where each student shows they can use the concept independently — e.g. explain it to a peer, solve one new problem, or predict-and-justify. Use it to see who is ready to move on.`}
+  };
+}
+
+/* =====================================================================
+   AI GENERATION (bring-your-own-key) — direct client-side call
+   ===================================================================== */
+function buildPrompt(concept,ageStr,subject,duration){
+  const subjectLine=subject?`Subject area: ${subject}.`:"";
+  const durationLine=duration?`Target class duration: ${duration}. Distribute time across the 5 phases so the total is close to this.`:"Total lesson roughly 45–60 minutes; distribute across the phases.";
+  return `You are an expert instructional designer creating a CONSTRUCTIVIST, INQUIRY-BASED classroom activity for a teacher.
+
+Concept to teach: "${concept}"
+Learner age/grade: ${ageStr}
+${subjectLine}
+${durationLine}
+
+The activity MUST combine two frameworks:
+1) ONE compelling DRIVING QUESTION at the core. It must provoke genuine investigation and not have an obvious answer (e.g. for triangle inequality: "Can any three side lengths make a triangle?").
+2) A full 5E lesson built around it: ENGAGE (hook that surfaces the question), EXPLORE (hands-on investigation where students CONSTRUCT understanding via manipulatives/experiments/data — teacher does not tell), EXPLAIN (students articulate findings first, then teacher formalizes concept + vocabulary), ELABORATE (extend/apply to a new context), EVALUATE (concrete check for understanding).
+
+AGE-APPROPRIATENESS IS CRITICAL — scale concrete→abstract:
+- Ages ~4–7: entirely physical, playful, sensory; no symbolic notation.
+- Ages ~8–11: manipulatives + simple recording; beginning generalizations in words.
+- Ages ~12–14: structured investigation, measurement, data tables, early symbolic reasoning.
+- Ages ~15+: formal reasoning, proof-like justification, notation, generalization.
+Materials, language, task complexity, and vocabulary MUST match the given age.
+
+For each 5E phase give: title (keep the E-name in the title), estimatedMinutes (integer), teacherInstructions (a specific runnable script of what the teacher does and says, and what students do — concrete, not vague), materials (array; [] if none).
+Also: activityTitle (short, evocative), ageBand (echo the age you designed for), totalMinutes (sum of phase minutes), learningObjective (one "Students will be able to…" sentence), keyVocabulary (array, 2–6 terms; near-empty for very young), materialsList (consolidated unique list).
+
+Return ONLY a single minified JSON object, no markdown, no preamble, matching exactly:
+{"activityTitle":"","drivingQuestion":"","ageBand":"","totalMinutes":0,"learningObjective":"","keyVocabulary":[],"materialsList":[],"engage":{"title":"","estimatedMinutes":0,"teacherInstructions":"","materials":[]},"explore":{...},"explain":{...},"elaborate":{...},"evaluate":{...}}`;
+}
+function extractJson(raw){
+  let s=(raw||"").trim();
+  const fence=s.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i); if(fence) s=fence[1].trim();
+  if(!s.startsWith("{")){const i=s.indexOf("{"); if(i<0) throw new Error("No JSON in response"); s=s.slice(i);}
+  const e=s.lastIndexOf("}"); if(e<0) throw new Error("Unterminated JSON"); return s.slice(0,e+1);
+}
+async function aiGenerate(cfg,concept,ageStr,subject,duration){
+  const prompt=buildPrompt(concept,ageStr,subject,duration);
+  let text="";
+  if(cfg.provider==="anthropic"){
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"content-type":"application/json","x-api-key":cfg.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-3-5-sonnet-20241022",max_tokens:4000,messages:[{role:"user",content:prompt}]})
+    });
+    if(!r.ok){throw new Error("Anthropic API "+r.status+": "+(await r.text()).slice(0,140));}
+    const j=await r.json(); text=(j.content||[]).map(b=>b.text||"").join("");
+  }else{
+    const r=await fetch("https://api.openai.com/v1/chat/completions",{
+      method:"POST",
+      headers:{"content-type":"application/json","authorization":"Bearer "+cfg.key},
+      body:JSON.stringify({model:"gpt-4o-mini",max_tokens:4000,response_format:{type:"json_object"},messages:[{role:"user",content:prompt}]})
+    });
+    if(!r.ok){throw new Error("OpenAI API "+r.status+": "+(await r.text()).slice(0,140));}
+    const j=await r.json(); text=j.choices?.[0]?.message?.content||"";
+  }
+  return JSON.parse(extractJson(text));
+}
+
+/* =====================================================================
+   ORCHESTRATION
+   ===================================================================== */
+let lastInput=null, busy=false;
+async function generate(concept,ageStr,subject,duration){
+  if(busy) return;
+  if(!concept.trim()||!ageStr.trim()){toast("Please enter both a concept and an age or grade.",true);return;}
+  lastInput={concept,ageStr,subject,duration};
+  const cfg=store.k;
+  setBusy(true);
+  try{
+    if(cfg&&cfg.key){
+      // full AI, with one retry
+      let a=null,err=null;
+      for(let i=0;i<2&&!a;i++){ try{ a=await aiGenerate(cfg,concept,ageStr,subject,duration); }catch(e){err=e;} }
+      if(!a){ toast("AI generation failed ("+(err?.message||"error")+"). Showing a built-in activity instead.",true);
+        a=libLookup(concept)||templateActivity(concept,ageStr,subject); }
+      renderActivity(a);
+    }else{
+      const lib=libLookup(concept);
+      renderActivity(lib||templateActivity(concept,ageStr,subject));
+      if(!lib) toast("Built from Spark's template. Add an API key (AI settings) for a fully tailored activity.");
+    }
+  }catch(e){ toast(e.message||"Something went wrong.",true); }
+  finally{ setBusy(false); }
+}
+function setBusy(b){
+  busy=b;
+  $("#genBtn").disabled=b; $("#regenBtn").disabled=b; $("#adjustBtn").disabled=b;
+  $("#genLabel").textContent=b?"Designing your activity…":"Generate activity";
+  $("#regenIcon").classList.toggle("spin",b);
+}
+
+/* ---------- key-mode badge ---------- */
+function refreshKeybar(){
+  const cfg=store.k; const bar=$("#keybar");
+  if(cfg&&cfg.key){
+    bar.innerHTML=`<span class="badge-mode ai">✦ Full AI generation on — any concept (${cfg.provider==="anthropic"?"Claude":"OpenAI"})</span>`;
+  }else{
+    bar.innerHTML=`<span class="badge-mode">Library + template mode</span> <span>Add an API key in <b>AI settings</b> to generate any concept with AI.</span>`;
+  }
+}
+
+/* ---------- examples ---------- */
+const EXAMPLES=[
+  {c:"Triangle inequality — can any 3 side lengths form a triangle?",a:"Grade 6 (age 11)",s:"Math"},
+  {c:"Why do we have seasons?",a:"Grade 4 (age 9)",s:"Science"},
+  {c:"What makes an experiment a fair test?",a:"Grade 5 (age 10)",s:"Science"},
+  {c:"How does supply and demand set prices?",a:"Grade 10 (age 15)",s:"Economics"},
+  {c:"What makes a poem feel like a poem?",a:"Grade 3 (age 8)",s:"Language Arts"}
+];
+function buildChips(){
+  $("#chips").innerHTML=EXAMPLES.map((e,i)=>
+    `<button class="chip" data-i="${i}"><span>${esc(e.c)}</span> <span class="age">· ${esc(e.a)}</span></button>`).join("");
+  document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{
+    const e=EXAMPLES[+ch.dataset.i];
+    $("#concept").value=e.c; $("#age").value=e.a; $("#subject").value=e.s;
+    generate(e.c,e.a,e.s,"");
+  });
+}
+
+/* ---------- wiring ---------- */
+$("#genForm").addEventListener("submit",ev=>{ev.preventDefault();
+  generate($("#concept").value,$("#age").value,$("#subject").value,$("#duration").value);});
+$("#newBtn").onclick=()=>{ $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
+  $("#landing").classList.remove("hidden"); window.scrollTo({top:0,behavior:"smooth"});};
+$("#regenBtn").onclick=()=>{ if(lastInput) generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);};
+$("#printBtn").onclick=()=>window.print();
+$("#adjustBtn").onclick=()=>{ if(!lastInput)return;
+  const next=prompt("New age or grade (e.g. 'Grade 8' or 'age 7'):",lastInput.ageStr);
+  if(next){ $("#age").value=next; generate(lastInput.concept,next,lastInput.subject,lastInput.duration);} };
+
+/* settings modal */
+let provider="anthropic";
+function openModal(){
+  const cfg=store.k; provider=cfg?.provider||"anthropic";
+  document.querySelectorAll("#providerSeg button").forEach(b=>b.classList.toggle("on",b.dataset.p===provider));
+  $("#apiKey").value=cfg?.key||"";
+  updKeyNote();
+  $("#modalBg").classList.add("show");
+}
+function updKeyNote(){
+  $("#keyNote").innerHTML= provider==="anthropic"
+    ? "Uses Claude 3.5 Sonnet. Get a key at console.anthropic.com. Calls go directly from your browser to Anthropic."
+    : "Uses GPT-4o mini. Get a key at platform.openai.com. Calls go directly from your browser to OpenAI.";
+}
+$("#settingsBtn").onclick=openModal;
+$("#modalBg").onclick=e=>{ if(e.target.id==="modalBg") $("#modalBg").classList.remove("show"); };
+document.querySelectorAll("#providerSeg button").forEach(b=>b.onclick=()=>{
+  provider=b.dataset.p;
+  document.querySelectorAll("#providerSeg button").forEach(x=>x.classList.toggle("on",x===b));
+  updKeyNote();
+});
+$("#saveKey").onclick=()=>{
+  const key=$("#apiKey").value.trim();
+  if(!key){ store.k=null; } else { store.k={provider,key}; }
+  refreshKeybar(); $("#modalBg").classList.remove("show");
+  toast(key?"API key saved — full AI generation is on.":"Key cleared.");
+};
+$("#clearKey").onclick=()=>{ store.k=null; $("#apiKey").value=""; refreshKeybar();
+  toast("Key removed. Back to library + template mode."); };
+
+/* init */
+buildChips(); refreshKeybar();
+</script>
+</body>
+</html>
