@@ -77,6 +77,22 @@
   .keybar{margin-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;font-size:13px;color:var(--muted)}
   .badge-mode{display:inline-flex;align-items:center;gap:6px;background:#f1e7d7;border-radius:999px;padding:5px 12px;font-weight:600;color:#6a5a48}
   .badge-mode.ai{background:#e3efe6;color:#2f7a4f}
+  /* activity style toggle */
+  .styleSeg{display:flex;gap:8px;flex-wrap:wrap}
+  .styleSeg button{flex:1;min-width:150px;border:1px solid var(--border);background:#fff;font:inherit;font-size:14px;font-weight:600;padding:11px 12px;border-radius:12px;cursor:pointer;color:var(--muted);transition:all .15s}
+  .styleSeg button.on{background:#faf3ea;border-color:var(--primary);color:var(--primary)}
+  .note-sm{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .chip-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--elaborate);color:#fff;border-radius:6px;padding:2px 6px;vertical-align:middle}
+  /* invented-words lexicon */
+  .lexicon{margin-top:18px;background:linear-gradient(135deg,#f4eefb,#efe9fa);border:1px solid #e5d9f5;border-radius:20px;padding:22px 24px}
+  .lexicon .lx-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a4fc0}
+  .lexicon .lx-sub{margin:10px 0 14px;font-size:14px;color:#5a4a6a}
+  .lx-t{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden}
+  .lx-t th{text-align:left;background:#f3edfb;color:#5a4a6a;font-weight:600;font-size:12.5px;padding:10px 12px}
+  .lx-t td{padding:10px 12px;border-top:1px solid #efe7fa;vertical-align:top}
+  .lx-blank{min-width:120px;color:#b9a9d6}
+  .lx-real{color:#7a4fc0;font-weight:600}
+  @media(max-width:560px){.lx-t th:nth-child(2),.lx-t td:nth-child(2){display:none}}
   /* activity card */
   .card-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end;margin-bottom:20px}
   .btn{border:1px solid var(--border);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:500;
@@ -175,6 +191,14 @@
       <div class="field">
         <label for="concept">What concept do you want to teach? <span class="req">*</span></label>
         <textarea id="concept" placeholder="e.g. Properties of a triangle — the triangle inequality"></textarea>
+      </div>
+      <div class="field">
+        <label>Approach</label>
+        <div class="styleSeg" id="styleSeg">
+          <button type="button" data-style="5e" class="on">5E Inquiry</button>
+          <button type="button" data-style="threshold">Threshold · invent the words</button>
+        </div>
+        <div class="note-sm" id="styleNote"></div>
       </div>
       <div class="row">
         <div class="field">
@@ -304,11 +328,13 @@ function renderActivity(a){
         </div>
       </div></div>`;
   }).join("");
+  const lexHtml=(a.lexicon&&a.lexicon.length)?`<section class="lexicon print-break"><div class="lx-h">${ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',15)} Invent the words — students coin their own names first</div><p class="lx-sub">Before any formal term is given, each group makes up its OWN word for every part below and uses only those words during Explore. In Explain, reveal the real term beside the word students already invented.</p><table class="lx-t"><thead><tr><th>Students invent a name for…</th><th>Their made-up word</th><th>Formal term (reveal in Explain)</th></tr></thead><tbody>${a.lexicon.map(l=>`<tr><td>${esc(l.slot)}</td><td class="lx-blank">${esc(l.coin||"")}</td><td class="lx-real">${esc(l.reveal)}</td></tr>`).join("")}</tbody></table></section>`:"";
   $("#activityBody").innerHTML=`
     <section class="hero-q">
       <div class="kicker">${ico('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',14)} Driving Question</div>
       <h1>${esc(a.drivingQuestion)}</h1>${facts}
     </section>
+    ${lexHtml}
     <div class="info-grid">
       <div class="block"><div class="h">${ico('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',14)} Learning objective</div><p>${esc(a.learningObjective)}</p></div>
       <div class="block"><div class="h">${ico('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',14)} Key vocabulary</div>${vocab}</div>
@@ -325,6 +351,33 @@ function renderActivity(a){
    CURATED LIBRARY — fully authored, ready-to-run activities
    ===================================================================== */
 const LIBRARY=[
+  {
+    style:"threshold",
+    match:["solution","solute","solvent","dissolve","dissolving","concentration","concentrated","saturated","mixture"],
+    activityTitle:"Name the Vanishing: Solutions from Scratch",
+    drivingQuestion:"When you stir something into water until it 'disappears', where does it go — and can you ever add too much?",
+    ageBand:"Grade 7 (age 12) · Ages 12–14", totalMinutes:55,
+    learningObjective:"Students will be able to explain concentrated solutions and how heating a concentrated solution lets more solute dissolve, after inventing their own names for the solvent, solute, and solution.",
+    keyVocabulary:["solvent","solute","solution","concentration","saturated"],
+    materialsList:["Clear cups of water","Salt or sugar (plenty)","Teaspoons & stirrers","'Our invented words' sheet","Hot water / hotplate (teacher-controlled)","Dark paper to view crystals"],
+    lexicon:[
+      {slot:"The liquid that does the dissolving (the water)",reveal:"solvent"},
+      {slot:"The stuff you stir in that seems to vanish",reveal:"solute"},
+      {slot:"The clear mixture you end up with",reveal:"solution"},
+      {slot:"How crowded / packed the mixture is",reveal:"concentration"},
+      {slot:"When it cannot swallow any more",reveal:"saturated"}
+    ],
+    engage:{title:"Engage — the disappearing act",estimatedMinutes:8,materials:["Clear cup of water","Salt or sugar"],
+      teacherInstructions:`Stir a spoon of salt into a clear cup of water until it vanishes. Ask: "Where did it go? Is it gone?" Add another spoon, and another, stirring each time — until a spoon finally will NOT disappear and sits on the bottom. Ask: "Why did the early spoons vanish but this one won't? Can water take an unlimited amount?" Post the driving question, and tell students they will figure it out — and they get to NAME everything themselves.`},
+    explore:{title:"Explore — invent your own words",estimatedMinutes:16,materials:["Cups of water","Salt/sugar","Spoons","'Our invented words' sheet"],
+      teacherInstructions:`Each group makes their own mixtures and INVENTS a brand-new made-up word for each of these: (1) the liquid that dissolves things, (2) the stuff that vanishes into it, (3) the clear mixture that results, and (4) how "crowded" the mixture feels. They write their words on the sheet and may use ONLY their own words. Challenge: keep adding the vanishing-stuff until no more will disappear, and coin a word for that "full up" state. Circulate and ask them to describe what they see in their own language — do NOT give the real terms yet.`},
+    explain:{title:"Explain — reveal the real names",estimatedMinutes:12,materials:["Class lexicon chart"],
+      teacherInstructions:`Each group shares its invented words and explains, in their own language, that stirring in more vanishing-stuff makes the mixture more "crowded". Build a class chart. NOW reveal each real term and write it next to the word students already invented: solvent (their liquid-word), solute (their vanishing-word), solution (their mixture-word), concentration (their crowded-word), saturated (their full-up word). Define a concentrated solution as a lot of solute for the amount of solvent, and dilute as only a little.`},
+    elaborate:{title:"Elaborate — heat a concentrated solution",estimatedMinutes:14,materials:["Hot water (teacher-controlled)","A saturated solution from Explore"],
+      teacherInstructions:`Take a group's saturated, concentrated solution that still has undissolved solute on the bottom. Predict: "If we warm it, what happens to the leftover solute?" Gently heat it (teacher-controlled) — the extra solute dissolves, because the hot solvent can hold MORE. Students explain using their framework: heat lets the solvent hold more solute, so the concentration can go higher. Then let it cool and watch crystals of solute reappear as the solution can no longer stay that concentrated.`},
+    evaluate:{title:"Evaluate — explain it two ways",estimatedMinutes:5,materials:["Exit slip"],
+      teacherInstructions:`Exit ticket: (1) In your OWN invented words AND the real terms, explain what a concentrated solution is. (2) Predict what happens if you heat a concentrated solution that still has solute sitting on the bottom, and explain WHY. Check that both explanations match.`}
+  },
   {
     match:["triangle inequality","three side","3 side","properties of a triangle","triangle"],
     activityTitle:"The Broken Ruler Triangle Challenge",
@@ -440,10 +493,11 @@ const LIBRARY=[
       teacherInstructions:"Exit slip: draw a crescent Moon and write one sentence explaining what causes it, using the words orbit and light."}
   }
 ];
-function libLookup(concept){
-  const c=(concept||"").toLowerCase();
+function libLookup(concept,style){
+  const c=(concept||"").toLowerCase(); style=(style==="threshold")?"threshold":"5e";
   let best=null,bestScore=0;
   for(const a of LIBRARY){
+    if((a.style||"5e")!==style) continue;
     let s=0; for(const m of a.match){ if(c.includes(m)) s=Math.max(s,m.length); }
     if(s>bestScore){bestScore=s;best=a;}
   }
@@ -455,7 +509,8 @@ function libLookup(concept){
    Produces a genuine 5E scaffold adapted to the age band.
    ===================================================================== */
 function titleCase(s){return (s||"").trim().replace(/\s+/g," ")}
-function templateActivity(concept,ageStr,subject){
+function templateActivity(concept,ageStr,subject,style){
+  if(style==="threshold") return thresholdTemplate(concept,ageStr,subject);
   const band=ageBand(ageStr);
   const C=titleCase(concept);
   const cShort=C.length>60?C.slice(0,57)+"…":C;
@@ -489,12 +544,47 @@ function templateActivity(concept,ageStr,subject){
   };
 }
 
+function thresholdTemplate(concept,ageStr,subject){
+  const band=ageBand(ageStr);
+  const C=titleCase(concept); const cShort=C.length>60?C.slice(0,57)+"…":C;
+  const cl=cShort.toLowerCase().replace(/\.$/,"");
+  const t=[8,18,14,8,5], total=t.reduce((a,b)=>a+b,0);
+  const dq=`What is really going on inside ${cl} — and what should we even call its parts?`;
+  return {
+    activityTitle:`Name It Yourself: ${cShort}`,
+    drivingQuestion:dq,
+    ageBand:`${ageStr} · ${band.label}`,
+    totalMinutes:total,
+    learningObjective:`Students will be able to explain ${cl} and its key behaviours by first inventing their own names for its parts, then mapping those invented words onto the formal terms.`,
+    keyVocabulary:["(the 2–5 real terms this concept normally uses)"],
+    materialsList:["Materials that let students observe the concept first-hand","'Our invented words' recording sheet","Whiteboard for the class lexicon"],
+    lexicon:[
+      {slot:"The first main part / thing involved",reveal:"(formal term 1)"},
+      {slot:"The second main part / thing involved",reveal:"(formal term 2)"},
+      {slot:"The whole thing / result they form together",reveal:"(formal term 3)"},
+      {slot:"A key property that can change (more / less)",reveal:"(formal term 4)"}
+    ],
+    engage:{title:"Engage — a phenomenon with no words yet",estimatedMinutes:t[0],materials:["A demonstration of the concept"],
+      teacherInstructions:`Show ${cl} happening in front of the class with NO vocabulary — just the phenomenon. Ask: "We don't have words for what's going on here yet. What are the different parts we can see?" Let students point at and describe the parts loosely. Post the driving question: "${dq}"`},
+    explore:{title:"Explore — invent your own words",estimatedMinutes:t[1],materials:["Hands-on materials","'Our invented words' sheet"],
+      teacherInstructions:`Groups investigate ${cl} hands-on. Their job: for each part in the lexicon table, INVENT a brand-new made-up word of their own (not the real term, not its etymology) and record it. From now on they may use ONLY their own words. Have them describe what happens — especially when a property gets bigger or smaller — using only their invented language. Do NOT give the real terms yet.`},
+    explain:{title:"Explain — reveal & map the real terms",estimatedMinutes:t[2],materials:["Class lexicon chart"],
+      teacherInstructions:`Each group shares its invented words and explains the phenomenon with them. Build a class chart. THEN reveal the formal term for each part and write it beside the students' invented word, so every new term is anchored to a word they already own. Students restate the idea using the real vocabulary.`},
+    elaborate:{title:"Elaborate — push the key behaviour",estimatedMinutes:t[3],materials:[],
+      teacherInstructions:`Introduce a change that tests the concept's key behaviour (make the property much bigger, or add heat / energy). Students predict, then check, explaining with BOTH their invented words and the formal terms. This reveals whether their model actually works.`},
+    evaluate:{title:"Evaluate — explain it two ways",estimatedMinutes:t[4],materials:["Exit slip"],
+      teacherInstructions:`Exit ticket: each student explains ${cl} and its key behaviour once in their invented words and once in the formal terms, showing the two match.`}
+  };
+}
+
 /* =====================================================================
    AI GENERATION (bring-your-own-key) — direct client-side call
    ===================================================================== */
-function buildPrompt(concept,ageStr,subject,duration){
+function buildPrompt(concept,ageStr,subject,duration,style){
   const subjectLine=subject?`Subject area: ${subject}.`:"";
   const durationLine=duration?`Target class duration: ${duration}. Distribute time across the 5 phases so the total is close to this.`:"Total lesson roughly 45–60 minutes; distribute across the phases.";
+  const thr=(style==="threshold")?` THRESHOLD / INVENT-THE-WORDS MODE (very important): this concept has a few core parts normally taught with jargon. Design the lesson so that DURING EXPLORE students INVENT their OWN brand-new made-up names for each part (not the real words, not their etymology) and reason using ONLY their invented words. In EXPLAIN, reveal the formal term for each and map it onto the word students already invented. Include a "lexicon" array (2-5 items) of objects with "slot" (a short description of the thing students name) and "reveal" (the formal term). Explore's teacherInstructions MUST tell students to coin and record their own word for each slot; Explain MUST map invented to formal. ELABORATE and EVALUATE must require students to explain the concept's KEY BEHAVIOURS using their framework (for example, for solutions: what a concentrated solution is, and what happens when you heat a concentrated solution).`:"";
+  const lexSchema=(style==="threshold")?`"lexicon":[{"slot":"","reveal":""}],`:"";
   return `You are an expert instructional designer creating a CONSTRUCTIVIST, INQUIRY-BASED classroom activity for a teacher.
 
 Concept to teach: "${concept}"
@@ -504,7 +594,7 @@ ${durationLine}
 
 The activity MUST combine two frameworks:
 1) ONE compelling DRIVING QUESTION at the core. It must provoke genuine investigation and not have an obvious answer (e.g. for triangle inequality: "Can any three side lengths make a triangle?").
-2) A full 5E lesson built around it: ENGAGE (hook that surfaces the question), EXPLORE (hands-on investigation where students CONSTRUCT understanding via manipulatives/experiments/data — teacher does not tell), EXPLAIN (students articulate findings first, then teacher formalizes concept + vocabulary), ELABORATE (extend/apply to a new context), EVALUATE (concrete check for understanding).
+2) A full 5E lesson built around it: ENGAGE (hook that surfaces the question), EXPLORE (hands-on investigation where students CONSTRUCT understanding via manipulatives/experiments/data — teacher does not tell), EXPLAIN (students articulate findings first, then teacher formalizes concept + vocabulary), ELABORATE (extend/apply to a new context), EVALUATE (concrete check for understanding).${thr}
 
 AGE-APPROPRIATENESS IS CRITICAL — scale concrete→abstract:
 - Ages ~4–7: entirely physical, playful, sensory; no symbolic notation.
@@ -517,7 +607,7 @@ For each 5E phase give: title (keep the E-name in the title), estimatedMinutes (
 Also: activityTitle (short, evocative), ageBand (echo the age you designed for), totalMinutes (sum of phase minutes), learningObjective (one "Students will be able to…" sentence), keyVocabulary (array, 2–6 terms; near-empty for very young), materialsList (consolidated unique list).
 
 Return ONLY a single minified JSON object, no markdown, no preamble, matching exactly:
-{"activityTitle":"","drivingQuestion":"","ageBand":"","totalMinutes":0,"learningObjective":"","keyVocabulary":[],"materialsList":[],"engage":{"title":"","estimatedMinutes":0,"teacherInstructions":"","materials":[]},"explore":{...},"explain":{...},"elaborate":{...},"evaluate":{...}}`;
+{"activityTitle":"","drivingQuestion":"","ageBand":"","totalMinutes":0,"learningObjective":"","keyVocabulary":[],"materialsList":[],${lexSchema}"engage":{"title":"","estimatedMinutes":0,"teacherInstructions":"","materials":[]},"explore":{...},"explain":{...},"elaborate":{...},"evaluate":{...}}`;
 }
 function extractJson(raw){
   let s=(raw||"").trim();
@@ -525,8 +615,8 @@ function extractJson(raw){
   if(!s.startsWith("{")){const i=s.indexOf("{"); if(i<0) throw new Error("No JSON in response"); s=s.slice(i);}
   const e=s.lastIndexOf("}"); if(e<0) throw new Error("Unterminated JSON"); return s.slice(0,e+1);
 }
-async function aiGenerate(cfg,concept,ageStr,subject,duration){
-  const prompt=buildPrompt(concept,ageStr,subject,duration);
+async function aiGenerate(cfg,concept,ageStr,subject,duration,style){
+  const prompt=buildPrompt(concept,ageStr,subject,duration,style);
   let text="";
   if(cfg.provider==="anthropic"){
     const r=await fetch("https://api.anthropic.com/v1/messages",{
@@ -551,25 +641,26 @@ async function aiGenerate(cfg,concept,ageStr,subject,duration){
 /* =====================================================================
    ORCHESTRATION
    ===================================================================== */
-let lastInput=null, busy=false;
+let lastInput=null, busy=false, activityStyle="5e";
 async function generate(concept,ageStr,subject,duration){
   if(busy) return;
   if(!concept.trim()||!ageStr.trim()){toast("Please enter both a concept and an age or grade.",true);return;}
-  lastInput={concept,ageStr,subject,duration};
+  const style=activityStyle;
+  lastInput={concept,ageStr,subject,duration,style};
   const cfg=store.k;
   setBusy(true);
   try{
     if(cfg&&cfg.key){
       // full AI, with one retry
       let a=null,err=null;
-      for(let i=0;i<2&&!a;i++){ try{ a=await aiGenerate(cfg,concept,ageStr,subject,duration); }catch(e){err=e;} }
+      for(let i=0;i<2&&!a;i++){ try{ a=await aiGenerate(cfg,concept,ageStr,subject,duration,style); }catch(e){err=e;} }
       if(!a){ toast("AI generation failed ("+(err?.message||"error")+"). Showing a built-in activity instead.",true);
-        a=libLookup(concept)||templateActivity(concept,ageStr,subject); }
+        a=libLookup(concept,style)||templateActivity(concept,ageStr,subject,style); }
       renderActivity(a);
     }else{
-      const lib=libLookup(concept);
-      renderActivity(lib||templateActivity(concept,ageStr,subject));
-      if(!lib) toast("Built from Spark's template. Add an API key (AI settings) for a fully tailored activity.");
+      const lib=libLookup(concept,style);
+      renderActivity(lib||templateActivity(concept,ageStr,subject,style));
+      if(!lib) toast(style==="threshold"?"Built from Spark's threshold template. Add an API key (AI settings) for a fully tailored invent-the-words activity.":"Built from Spark's template. Add an API key (AI settings) for a fully tailored activity.");
     }
   }catch(e){ toast(e.message||"Something went wrong.",true); }
   finally{ setBusy(false); }
@@ -593,6 +684,7 @@ function refreshKeybar(){
 
 /* ---------- examples ---------- */
 const EXAMPLES=[
+  {c:"Solutions — name the liquid, the solute, and the mixture yourself",a:"Grade 7 (age 12)",s:"Science",st:"threshold"},
   {c:"Triangle inequality — can any 3 side lengths form a triangle?",a:"Grade 6 (age 11)",s:"Math"},
   {c:"Why do we have seasons?",a:"Grade 4 (age 9)",s:"Science"},
   {c:"What makes an experiment a fair test?",a:"Grade 5 (age 10)",s:"Science"},
@@ -600,11 +692,14 @@ const EXAMPLES=[
   {c:"What makes a poem feel like a poem?",a:"Grade 3 (age 8)",s:"Language Arts"}
 ];
 function buildChips(){
-  $("#chips").innerHTML=EXAMPLES.map((e,i)=>
-    `<button class="chip" data-i="${i}"><span>${esc(e.c)}</span> <span class="age">· ${esc(e.a)}</span></button>`).join("");
+  $("#chips").innerHTML=EXAMPLES.map((e,i)=>{
+    const tag=e.st==="threshold"?`<span class="chip-tag">Threshold</span> `:"";
+    return `<button class="chip" data-i="${i}">${tag}<span>${esc(e.c)}</span> <span class="age">· ${esc(e.a)}</span></button>`;
+  }).join("");
   document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{
     const e=EXAMPLES[+ch.dataset.i];
     $("#concept").value=e.c; $("#age").value=e.a; $("#subject").value=e.s;
+    setStyle(e.st||"5e");
     generate(e.c,e.a,e.s,"");
   });
 }
@@ -614,11 +709,11 @@ $("#genForm").addEventListener("submit",ev=>{ev.preventDefault();
   generate($("#concept").value,$("#age").value,$("#subject").value,$("#duration").value);});
 $("#newBtn").onclick=()=>{ $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
   $("#landing").classList.remove("hidden"); window.scrollTo({top:0,behavior:"smooth"});};
-$("#regenBtn").onclick=()=>{ if(lastInput) generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);};
+$("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
 $("#printBtn").onclick=()=>window.print();
 $("#adjustBtn").onclick=()=>{ if(!lastInput)return;
   const next=prompt("New age or grade (e.g. 'Grade 8' or 'age 7'):",lastInput.ageStr);
-  if(next){ $("#age").value=next; generate(lastInput.concept,next,lastInput.subject,lastInput.duration);} };
+  if(next){ $("#age").value=next; setStyle(lastInput.style||"5e"); generate(lastInput.concept,next,lastInput.subject,lastInput.duration);} };
 
 /* settings modal */
 let provider="anthropic";
@@ -651,7 +746,13 @@ $("#clearKey").onclick=()=>{ store.k=null; $("#apiKey").value=""; refreshKeybar(
   toast("Key removed. Back to library + template mode."); };
 
 /* init */
-buildChips(); refreshKeybar();
+function setStyle(s){
+  activityStyle=(s==="threshold")?"threshold":"5e";
+  document.querySelectorAll("#styleSeg button").forEach(b=>b.classList.toggle("on",b.dataset.style===activityStyle));
+  const n=$("#styleNote"); if(n) n.textContent=activityStyle==="threshold"?"Students invent their own made-up words for each part of the concept before any formal term is introduced, then reason with their own language.":"A driving question with a hands-on 5E investigation.";
+}
+document.querySelectorAll("#styleSeg button").forEach(b=>b.onclick=()=>setStyle(b.dataset.style));
+buildChips(); refreshKeybar(); setStyle("5e");
 </script>
 </body>
 </html>
