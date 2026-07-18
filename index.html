@@ -93,6 +93,25 @@
   .lx-blank{min-width:120px;color:#b9a9d6}
   .lx-real{color:#7a4fc0;font-weight:600}
   @media(max-width:560px){.lx-t th:nth-child(2),.lx-t td:nth-child(2){display:none}}
+  .moveSeg{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .moveSeg.hidden{display:none}
+  .moveSeg button{flex:1;min-width:150px;border:1px solid var(--border);background:#fff;font:inherit;font-size:13.5px;font-weight:600;padding:9px 12px;border-radius:10px;cursor:pointer;color:var(--muted);transition:all .15s}
+  .moveSeg button.on{background:#eef7f1;border-color:#2f8a5f;color:#2f8a5f}
+  .trouble{margin-top:18px;background:linear-gradient(135deg,#fdf0e8,#fbe9e0);border:1px solid #f3d6c4;border-radius:20px;padding:18px 22px}
+  .trouble .tr-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c2600f}
+  .trouble p{margin:8px 0 0;font-size:15px;color:#7a4a2a;line-height:1.55}
+  .rulebox{margin-top:18px;background:linear-gradient(135deg,#eaf5ef,#e4f2ec);border:1px solid #cfe8db;border-radius:20px;padding:22px 24px}
+  .rulebox .lx-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2f8a5f}
+  .rulebox .lx-sub{margin:10px 0 14px;font-size:14px;color:#3d5f4f}
+  .rule-write{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .rule-write .rw-l{display:block;font-size:12.5px;font-weight:700;color:#2f8a5f;text-transform:uppercase;letter-spacing:.06em}
+  .rw-blank{height:44px;border-bottom:2px dashed #bfe0cf;margin-top:8px}
+  .rule-real{background:#fff;border-radius:12px;padding:14px 16px}
+  .rule-real .rr-l{display:block;font-size:12.5px;font-weight:700;color:#2f8a5f;text-transform:uppercase;letter-spacing:.06em}
+  .rule-real p{margin:8px 0 0;font-size:15px;color:#22402f;line-height:1.55}
+  .pedagogy{margin-top:22px;background:#f7f4ef;border:1px solid var(--border);border-radius:16px;padding:16px 20px}
+  .pedagogy .pg-h{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .pedagogy p{margin:8px 0 0;font-size:14px;color:var(--ink);line-height:1.6}
   /* activity card */
   .card-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end;margin-bottom:20px}
   .btn{border:1px solid var(--border);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:500;
@@ -199,6 +218,11 @@
           <button type="button" data-style="threshold">Threshold · invent the words</button>
         </div>
         <div class="note-sm" id="styleNote"></div>
+        <div class="moveSeg hidden" id="moveSeg">
+          <button type="button" data-move="words" class="on">Invent the words</button>
+          <button type="button" data-move="rule">Generate the rule</button>
+        </div>
+        <div class="note-sm" id="moveNote"></div>
       </div>
       <div class="row">
         <div class="field">
@@ -295,11 +319,22 @@ const PHASE_META=[
   {key:"elaborate",step:"4 · Elaborate",desc:"Extend & apply",color:"var(--elaborate)",icon:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>'},
   {key:"evaluate",step:"5 · Evaluate",desc:"Check for understanding",color:"var(--evaluate)",icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'}
 ];
+const THRESHOLD_PHASE_META=[
+  {key:"engage",step:"Construct · Immerse",desc:"Meet the phenomenon — engagement lives here",color:"var(--engage)",icon:PHASE_META[0].icon},
+  {key:"explore",step:"Construct · Invent",desc:"Coin words or build the pattern",color:"var(--explore)",icon:PHASE_META[1].icon},
+  {key:"explain",step:"Formalise",desc:"Map to real terms & state the rule",color:"var(--explain)",icon:PHASE_META[2].icon},
+  {key:"elaborate",step:"Transfer · later lesson",desc:"Apply to a new context — deferred",color:"var(--elaborate)",icon:PHASE_META[3].icon},
+  {key:"evaluate",step:"Check",desc:"Show understanding two ways",color:"var(--evaluate)",icon:PHASE_META[4].icon}
+];
 const ico=(p,w=16)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 
 /* ---------- render an activity object ---------- */
 function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
 function renderActivity(a){
+  lastActivity=a;
+  const isThr=!!(a.lexicon||a.troublesome||a.rule);
+  const move=(typeof thresholdMove!=='undefined')?thresholdMove:'words';
+  const meta=isThr?THRESHOLD_PHASE_META:PHASE_META;
   const facts=`
     <div class="facts">
       <span class="title">${esc(a.activityTitle)}</span>
@@ -312,7 +347,7 @@ function renderActivity(a){
   const mats=(a.materialsList&&a.materialsList.length)
     ? `<ul class="mats">${a.materialsList.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`
     : `<p style="color:var(--muted);font-style:italic;font-size:14px">No materials needed.</p>`;
-  const phases=PHASE_META.map(pm=>{
+  const phases=meta.map(pm=>{
     const p=a[pm.key]||{}; const pmats=(p.materials&&p.materials.length)
       ? `<div class="pm"><span class="t">Materials:</span>${p.materials.map(m=>`<span class="m">${esc(m)}</span>`).join("")}</div>`:"";
     return `<div class="phase">
@@ -329,18 +364,23 @@ function renderActivity(a){
       </div></div>`;
   }).join("");
   const lexHtml=(a.lexicon&&a.lexicon.length)?`<section class="lexicon print-break"><div class="lx-h">${ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',15)} Invent the words — students coin their own names first</div><p class="lx-sub">Before any formal term is given, each group makes up its OWN word for every part below and uses only those words during Explore. In Explain, reveal the real term beside the word students already invented.</p><table class="lx-t"><thead><tr><th>Students invent a name for…</th><th>Their made-up word</th><th>Formal term (reveal in Explain)</th></tr></thead><tbody>${a.lexicon.map(l=>`<tr><td>${esc(l.slot)}</td><td class="lx-blank">${esc(l.coin||"")}</td><td class="lx-real">${esc(l.reveal)}</td></tr>`).join("")}</tbody></table></section>`:"";
+  const troubleHtml=(isThr&&a.troublesome)?`<section class="trouble"><div class="tr-h">${ico('<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',14)} Troublesome knowledge — the idea that trips learners up</div><p>${esc(a.troublesome)}</p></section>`:"";
+  const ruleHtml=(isThr&&a.rule)?`<section class="rulebox print-break"><div class="lx-h">${ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',15)} Generate the rule — students form the generalisation first</div><p class="lx-sub">Before the teacher states any rule, each group writes its OWN general statement of what always happens, drawn from their evidence. Then compare it with the formal generalisation below.</p><div class="rule-write"><span class="rw-l">Our rule (students write)</span><div class="rw-blank"></div></div><div class="rule-real"><span class="rr-l">The formal generalisation — reveal after</span><p>${esc(a.rule)}</p></div></section>`:"";
+  const constructHtml=isThr?(move==="rule"?ruleHtml:lexHtml):"";
+  const pedagogyHtml=isThr?`<section class="pedagogy"><div class="pg-h">How this threshold lesson is sequenced</div><p><b>Engagement sits inside the construction.</b> There is no separate hook — curiosity comes from meeting the phenomenon while students build meaning, so the ${move==="rule"?"rule-forming":"word-inventing"} IS the engagement. <b>Transfer comes later.</b> Applying the idea to new contexts is deliberately deferred to a follow-up lesson, once the core meaning is secure.</p></section>`:"";
   $("#activityBody").innerHTML=`
     <section class="hero-q">
       <div class="kicker">${ico('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',14)} Driving Question</div>
       <h1>${esc(a.drivingQuestion)}</h1>${facts}
     </section>
-    ${lexHtml}
+    ${troubleHtml}
+    ${constructHtml}
     <div class="info-grid">
       <div class="block"><div class="h">${ico('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',14)} Learning objective</div><p>${esc(a.learningObjective)}</p></div>
       <div class="block"><div class="h">${ico('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',14)} Key vocabulary</div>${vocab}</div>
       <div class="block"><div class="h">${ico('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',14)} Materials</div>${mats}</div>
     </div>
-    <div class="phases"><h2>The 5E Lesson</h2>${phases}</div>`;
+    <div class="phases"><h2>${isThr?"Construct → Formalise → Transfer":"The 5E Lesson"}</h2>${phases}</div>${pedagogyHtml}`;
   $("#landing").classList.add("hidden");
   $("#activity").classList.remove("hidden");
   $("#newBtn").classList.remove("hidden");
@@ -355,6 +395,8 @@ const LIBRARY=[
     style:"threshold",
     match:["density","float","floating","floats","sink","sinks","sinking","why things float","buoyancy","dense"],
     activityTitle:"Why Ships Float and Nails Sink",
+    troublesome:"Whether something floats has nothing to do with how big or how heavy it is on its own — only with how tightly its matter is packed compared with water.",
+    rule:"An object floats when it is less dense than the liquid and sinks when it is denser, whatever its size or total weight; spreading the same mass over more space (trapping air) lowers its density.",
     drivingQuestion:"A steel ship the size of a building floats, but a tiny steel nail sinks — how can the same metal do both?",
     ageBand:"Grade 6 (age 11) · Ages 8–11", totalMinutes:50,
     learningObjective:"Students will be able to explain that whether something floats depends on how tightly its matter is packed compared to water (its density), not on how big or heavy it is, after inventing their own names for the amount of matter, the space it fills, and its 'packed-ness'.",
@@ -381,6 +423,8 @@ const LIBRARY=[
     style:"threshold",
     match:["circuit","circuits","electric","electricity","light a bulb","battery and bulb","current","series circuit","open circuit","closed circuit"],
     activityTitle:"The Bulb That Needs a Full Loop",
+    troublesome:"Touching the wire to the battery is not enough — current only flows when there is a complete, unbroken loop all the way back to the battery.",
+    rule:"A bulb lights only when there is a complete (closed) loop for the current, and a switch works by making or breaking that loop.",
     drivingQuestion:"Why won't a bulb light from a battery unless the wire makes a complete loop all the way back?",
     ageBand:"Grade 6 (age 11) · Ages 8–11", totalMinutes:50,
     learningObjective:"Students will be able to explain that a bulb lights only when there is a complete (closed) loop for current, and that a switch works by breaking or completing that loop, after inventing their own names for the push, the flow, and the loop.",
@@ -407,6 +451,8 @@ const LIBRARY=[
     style:"threshold",
     match:["adjective","adjectives","describing word","describing words","parts of speech","noun and adjective","describing words"],
     activityTitle:"The Words That Change the Picture",
+    troublesome:"Meaning lives in the relationship between words: some words exist only to change how you picture another word, so a word's job matters as much as the word itself.",
+    rule:"An adjective describes a noun and changes the picture in the reader's mind; adjectives can be added or stacked to sharpen or change that image.",
     drivingQuestion:"What gives some words the power to completely change the picture in your head about another word?",
     ageBand:"Grade 3 (age 8) · Ages 8–11", totalMinutes:40,
     learningObjective:"Students will be able to identify adjectives and explain that they describe nouns and change the picture in the reader's mind, after inventing their own names for naming-words and describing-words.",
@@ -432,6 +478,8 @@ const LIBRARY=[
     style:"threshold",
     match:["metaphor","simile","figurative","figurative language","figures of speech","literal and figurative","imagery"],
     activityTitle:"When the Classroom Is a Zoo",
+    troublesome:"A sentence can be literally false yet completely true — figurative language transfers a quality from one thing to another rather than stating a fact.",
+    rule:"A metaphor says one thing IS another and a simile says one thing is LIKE another; both work by transferring a shared quality between the two ideas.",
     drivingQuestion:"How can 'the classroom was a zoo' be TRUE when there were no animals in the room?",
     ageBand:"Grade 6 (age 11) · Ages 8–11", totalMinutes:50,
     learningObjective:"Students will be able to tell literal from figurative language and explain how a metaphor or simile transfers a quality from one thing to another, after inventing their own names for say-it-straight language and paint-a-picture language.",
@@ -458,6 +506,8 @@ const LIBRARY=[
     style:"threshold",
     match:["complete sentence","sentence vs fragment","subject and predicate","fragment","what makes a sentence","subject predicate","complete thought"],
     activityTitle:"When Words Become a Complete Thought",
+    troublesome:"Interesting words or great length don't make a sentence — a group of words only becomes a complete thought when it has both a subject and a predicate.",
+    rule:"A complete sentence needs a subject (who or what) and a predicate (what they are or do); without both it is a fragment that leaves you hanging.",
     drivingQuestion:"When does a pile of words finally become a 'complete thought' you can stop on — and why do fragments leave you hanging?",
     ageBand:"Grade 4 (age 9) · Ages 8–11", totalMinutes:45,
     learningObjective:"Students will be able to explain that a complete sentence needs a subject and a predicate, and fix fragments, after inventing their own names for the who/what part, the doing/being part, and the 'finished' feeling.",
@@ -484,6 +534,8 @@ const LIBRARY=[
     style:"threshold",
     match:["comma","commas","punctuation","punctuate","comma rules","using commas"],
     activityTitle:"The Comma That Saved Grandma",
+    troublesome:"A mark with no sound of its own can change a sentence's meaning by regrouping its words.",
+    rule:"A comma groups and separates words to control meaning — separating items in a list, marking who you are speaking to, and splitting two joined ideas.",
     drivingQuestion:"How can one tiny comma change WHO gets eaten in 'Let's eat Grandma'?",
     ageBand:"Grade 5 (age 10) · Ages 8–11", totalMinutes:45,
     learningObjective:"Students will be able to explain how commas change meaning by grouping and separating words, and use them for lists and direct address, after inventing their own names for the pause-mark and its jobs.",
@@ -510,6 +562,8 @@ const LIBRARY=[
     style:"threshold",
     match:["fraction","fractions","numerator","denominator","equivalent fraction","part of a whole","parts of a whole"],
     activityTitle:"Whose Half Is Bigger?",
+    troublesome:"A fraction is not just 'a number over a number': its size depends entirely on the whole it refers to, so 'a half' is not a fixed amount.",
+    rule:"The denominator is how many equal parts the whole is cut into (bigger denominator, smaller parts) and the numerator is how many you take; the same fraction can be different amounts when the wholes differ.",
     drivingQuestion:"You and a friend each got 'half' — so why is your friend's half clearly bigger?",
     ageBand:"Grade 4 (age 9) · Ages 8–11", totalMinutes:50,
     learningObjective:"Students will be able to explain that a fraction describes equal parts of a particular whole, and find equivalent fractions, after inventing their own names for the whole, the parts, and how many are taken.",
@@ -536,6 +590,8 @@ const LIBRARY=[
     style:"threshold",
     match:["force","forces","push","pull","balanced","unbalanced","net force","friction","gravity and motion"],
     activityTitle:"The Tug-of-War That Goes Nowhere",
+    troublesome:"Things don't move just because a force acts on them — a still object can have huge forces on it; motion only changes when forces are unbalanced.",
+    rule:"An object's motion stays the same when forces are balanced and only changes (speeds up, slows down, or turns) when the forces are unbalanced.",
     drivingQuestion:"In a tug-of-war both teams pull with huge force — so why can the rope stay completely still?",
     ageBand:"Grade 5 (age 10) · Ages 8–11", totalMinutes:50,
     learningObjective:"Students will be able to explain that motion changes only when forces are unbalanced, after inventing their own names for pushes and pulls and the 'winner' of competing forces.",
@@ -562,6 +618,8 @@ const LIBRARY=[
     style:"threshold",
     match:["photosynthesis","chlorophyll","how plants make food","plants make food","plant food","glucose","how plants grow","where plants get mass"],
     activityTitle:"Where Does a Tree Come From?",
+    troublesome:"A tree's mass comes mostly from an invisible gas in the air (carbon dioxide), not from the soil it grows in.",
+    rule:"In light, a plant uses carbon dioxide and water to build glucose and release oxygen, so most of its mass is built from the air.",
     drivingQuestion:"A tree can weigh tonnes, yet the soil in its pot barely goes down — so where did all that tree actually come from?",
     ageBand:"Grade 7 (age 12) · Ages 12–14", totalMinutes:55,
     learningObjective:"Students will be able to explain that plants build their own food and mass using light, carbon dioxide and water (not soil), after inventing their own names for the gas taken in, the food-maker, the process and the products.",
@@ -589,6 +647,8 @@ const LIBRARY=[
     style:"threshold",
     match:["solution","solute","solvent","dissolve","dissolving","concentration","concentrated","saturated","mixture"],
     activityTitle:"Name the Vanishing: Solutions from Scratch",
+    troublesome:"The dissolved solute hasn't vanished — it is still there, spread among the water particles; and a given amount of water can only hold so much, a limit that rises with temperature.",
+    rule:"The more solute dissolved in a fixed amount of solvent, the more concentrated the solution; heating the solvent lets it hold (dissolve) more solute.",
     drivingQuestion:"When you stir something into water until it 'disappears', where does it go — and can you ever add too much?",
     ageBand:"Grade 7 (age 12) · Ages 12–14", totalMinutes:55,
     learningObjective:"Students will be able to explain concentrated solutions and how heating a concentrated solution lets more solute dissolve, after inventing their own names for the solvent, solute, and solution.",
@@ -786,6 +846,8 @@ function thresholdTemplate(concept,ageStr,subject){
   const dq=`What is really going on inside ${cl} — and what should we even call its parts?`;
   return {
     activityTitle:`Name It Yourself: ${cShort}`,
+    troublesome:`${C} is a threshold idea: part of how it really works clashes with what students first assume, so they must rebuild their mental model rather than just add a fact.`,
+    rule:`After investigating, students state the generalisation for ${cl} in their own words, then match it to the formal rule.`,
     drivingQuestion:dq,
     ageBand:`${ageStr} · ${band.label}`,
     totalMinutes:total,
@@ -814,11 +876,14 @@ function thresholdTemplate(concept,ageStr,subject){
 /* =====================================================================
    AI GENERATION (bring-your-own-key) — direct client-side call
    ===================================================================== */
-function buildPrompt(concept,ageStr,subject,duration,style){
+function buildPrompt(concept,ageStr,subject,duration,style,move){
   const subjectLine=subject?`Subject area: ${subject}.`:"";
   const durationLine=duration?`Target class duration: ${duration}. Distribute time across the 5 phases so the total is close to this.`:"Total lesson roughly 45–60 minutes; distribute across the phases.";
-  const thr=(style==="threshold")?` THRESHOLD / INVENT-THE-WORDS MODE (very important): this concept has a few core parts normally taught with jargon. Design the lesson so that DURING EXPLORE students INVENT their OWN brand-new made-up names for each part (not the real words, not their etymology) and reason using ONLY their invented words. In EXPLAIN, reveal the formal term for each and map it onto the word students already invented. Include a "lexicon" array (2-5 items) of objects with "slot" (a short description of the thing students name) and "reveal" (the formal term). Explore's teacherInstructions MUST tell students to coin and record their own word for each slot; Explain MUST map invented to formal. ELABORATE and EVALUATE must require students to explain the concept's KEY BEHAVIOURS using their framework (for example, for solutions: what a concentrated solution is, and what happens when you heat a concentrated solution).`:"";
-  const lexSchema=(style==="threshold")?`"lexicon":[{"slot":"","reveal":""}],`:"";
+  const thrCommon=` THRESHOLD MODE (very important). This is a threshold concept: it contains "troublesome knowledge" that clashes with students' intuition and, once grasped, transforms how they see the topic. You MUST include: "troublesome" (one sentence naming the counter-intuitive idea learners get stuck on) and "rule" (one sentence stating the generalisation students should end up with, in plain language). SEQUENCING RULE: do NOT treat ENGAGE as a separate hook — engagement must sit INSIDE the construction, i.e. curiosity arises from meeting the phenomenon while students build meaning. Keep TRANSFER for later: ELABORATE should be framed as a follow-up/later-lesson application, not crammed in immediately.`;
+  const thrWords=` CONSTRUCTION MOVE = INVENT-THE-WORDS. During EXPLORE students INVENT their OWN brand-new made-up names for each core part (not the real words, not etymology) and reason using ONLY their invented words. In EXPLAIN, reveal the formal term for each and map it onto the invented word. Include a "lexicon" array (2-5 items) of objects with "slot" (short description of the thing students name) and "reveal" (the formal term).`;
+  const thrRule=` CONSTRUCTION MOVE = GENERATE-THE-RULE. During EXPLORE students gather evidence and, before any rule is told to them, WRITE THEIR OWN general statement of what always happens (a conjecture). In EXPLAIN they compare their generalisation with the formal "rule" and refine it. Include an empty "lexicon":[] array. Explore's teacherInstructions MUST have students form and record their own rule from evidence; Explain MUST compare student rule to the formal rule.`;
+  const thr=(style==="threshold")?(thrCommon+(move==="rule"?thrRule:thrWords)):"";
+  const lexSchema=(style==="threshold")?`"troublesome":"","rule":"","lexicon":[{"slot":"","reveal":""}],`:"";
   return `You are an expert instructional designer creating a CONSTRUCTIVIST, INQUIRY-BASED classroom activity for a teacher.
 
 Concept to teach: "${concept}"
@@ -849,8 +914,8 @@ function extractJson(raw){
   if(!s.startsWith("{")){const i=s.indexOf("{"); if(i<0) throw new Error("No JSON in response"); s=s.slice(i);}
   const e=s.lastIndexOf("}"); if(e<0) throw new Error("Unterminated JSON"); return s.slice(0,e+1);
 }
-async function aiGenerate(cfg,concept,ageStr,subject,duration,style){
-  const prompt=buildPrompt(concept,ageStr,subject,duration,style);
+async function aiGenerate(cfg,concept,ageStr,subject,duration,style,move){
+  const prompt=buildPrompt(concept,ageStr,subject,duration,style,move);
   let text="";
   if(cfg.provider==="anthropic"){
     const r=await fetch("https://api.anthropic.com/v1/messages",{
@@ -875,19 +940,20 @@ async function aiGenerate(cfg,concept,ageStr,subject,duration,style){
 /* =====================================================================
    ORCHESTRATION
    ===================================================================== */
-let lastInput=null, busy=false, activityStyle="5e";
+let lastInput=null, busy=false, activityStyle="5e", thresholdMove="words", lastActivity=null;
 async function generate(concept,ageStr,subject,duration){
   if(busy) return;
   if(!concept.trim()||!ageStr.trim()){toast("Please enter both a concept and an age or grade.",true);return;}
   const style=activityStyle;
-  lastInput={concept,ageStr,subject,duration,style};
+  const move=(style==="threshold")?thresholdMove:"words";
+  lastInput={concept,ageStr,subject,duration,style,move};
   const cfg=store.k;
   setBusy(true);
   try{
     if(cfg&&cfg.key){
       // full AI, with one retry
       let a=null,err=null;
-      for(let i=0;i<2&&!a;i++){ try{ a=await aiGenerate(cfg,concept,ageStr,subject,duration,style); }catch(e){err=e;} }
+      for(let i=0;i<2&&!a;i++){ try{ a=await aiGenerate(cfg,concept,ageStr,subject,duration,style,move); }catch(e){err=e;} }
       if(!a){ toast("AI generation failed ("+(err?.message||"error")+"). Showing a built-in activity instead.",true);
         a=libLookup(concept,style)||templateActivity(concept,ageStr,subject,style); }
       renderActivity(a);
@@ -948,7 +1014,7 @@ $("#genForm").addEventListener("submit",ev=>{ev.preventDefault();
   generate($("#concept").value,$("#age").value,$("#subject").value,$("#duration").value);});
 $("#newBtn").onclick=()=>{ $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
   $("#landing").classList.remove("hidden"); window.scrollTo({top:0,behavior:"smooth"});};
-$("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
+$("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); if(lastInput.move) setMove(lastInput.move); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
 $("#printBtn").onclick=()=>window.print();
 $("#adjustBtn").onclick=()=>{ if(!lastInput)return;
   const next=prompt("New age or grade (e.g. 'Grade 8' or 'age 7'):",lastInput.ageStr);
@@ -988,9 +1054,18 @@ $("#clearKey").onclick=()=>{ store.k=null; $("#apiKey").value=""; refreshKeybar(
 function setStyle(s){
   activityStyle=(s==="threshold")?"threshold":"5e";
   document.querySelectorAll("#styleSeg button").forEach(b=>b.classList.toggle("on",b.dataset.style===activityStyle));
-  const n=$("#styleNote"); if(n) n.textContent=activityStyle==="threshold"?"Students invent their own made-up words for each part of the concept before any formal term is introduced, then reason with their own language.":"A driving question with a hands-on 5E investigation.";
+  const n=$("#styleNote"); if(n) n.textContent=activityStyle==="threshold"?"Names the troublesome knowledge, then students construct meaning first — either inventing their own words or forming the rule. Engagement lives inside the construction; transfer comes in a later lesson.":"A driving question with a hands-on 5E investigation.";
+  const ms=$("#moveSeg"); if(ms) ms.classList.toggle("hidden",activityStyle!=="threshold");
+  const mn=$("#moveNote"); if(mn) mn.textContent=(activityStyle!=="threshold")?"":(thresholdMove==="rule"?"Students gather evidence and write their own generalisation before the formal rule is revealed.":"Students coin their own made-up word for each part before any formal term is introduced.");
+}
+function setMove(m){
+  thresholdMove=(m==="rule")?"rule":"words";
+  document.querySelectorAll("#moveSeg button").forEach(b=>b.classList.toggle("on",b.dataset.move===thresholdMove));
+  const mn=$("#moveNote"); if(mn) mn.textContent=thresholdMove==="rule"?"Students gather evidence and write their own generalisation before the formal rule is revealed.":"Students coin their own made-up word for each part before any formal term is introduced.";
+  if(lastActivity&&(activityStyle==="threshold")) renderActivity(lastActivity);
 }
 document.querySelectorAll("#styleSeg button").forEach(b=>b.onclick=()=>setStyle(b.dataset.style));
+document.querySelectorAll("#moveSeg button").forEach(b=>b.onclick=()=>setMove(b.dataset.move));
 buildChips(); refreshKeybar(); setStyle("5e");
 </script>
 </body>
