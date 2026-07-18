@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Spark — Constructivist activity generator for teachers</title>
+<title>Forge Lesson — Constructivist activity generator for teachers</title>
 <meta name="description" content="Turn any concept into an inquiry-based, 5E classroom activity built around a compelling driving question — tailored to your learners' age." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -167,7 +167,7 @@
 <header class="top wrap no-print">
   <div class="brand">
     <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4L12 3z"/><path d="M19 14l.8 2 .2.8-2 .8L17 20l-.8-2-.2-.8 2-.8L19 14z"/></svg></span>
-    <b>Spark</b>
+    <b>Forge Lesson</b>
   </div>
   <div>
     <button class="ghost" id="settingsBtn" title="Set an API key for full AI generation">
@@ -183,7 +183,7 @@
   <section id="landing">
     <div class="hero">
       <span class="pill">✦ Constructivist activity generator</span>
-      <h1>Turn any concept into a <span class="grad">spark of inquiry</span>.</h1>
+      <h1>Turn any concept into a <span class="grad">driving question</span>.</h1>
       <p>Enter a concept, choose an age, and get a ready-to-run 5E lesson built around one compelling driving question.</p>
     </div>
 
@@ -245,7 +245,7 @@
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h2>AI generation settings</h2>
-    <p class="sub">Spark works out of the box using its built-in activity library. Add your own API key to unlock full AI generation for <em>any</em> concept. Your key is stored only in this browser and sent directly to the provider — never to any Spark server.</p>
+    <p class="sub">Forge Lesson works out of the box using its built-in activity library. Add your own API key to unlock full AI generation for <em>any</em> concept. Your key is stored only in this browser and sent directly to the provider — never to any Forge Lesson server.</p>
     <div class="seg" id="providerSeg">
       <button data-p="anthropic" class="on">Anthropic (Claude)</button>
       <button data-p="openai">OpenAI</button>
@@ -894,7 +894,7 @@ async function generate(concept,ageStr,subject,duration){
     }else{
       const lib=libLookup(concept,style);
       renderActivity(lib||templateActivity(concept,ageStr,subject,style));
-      if(!lib) toast(style==="threshold"?"Built from Spark's threshold template. Add an API key (AI settings) for a fully tailored invent-the-words activity.":"Built from Spark's template. Add an API key (AI settings) for a fully tailored activity.");
+      if(!lib) toast(style==="threshold"?"Built from Forge Lesson's threshold template. Add an API key (AI settings) for a fully tailored invent-the-words activity.":"Built from Forge Lesson's template. Add an API key (AI settings) for a fully tailored activity.");
     }
   }catch(e){ toast(e.message||"Something went wrong.",true); }
   finally{ setBusy(false); }
