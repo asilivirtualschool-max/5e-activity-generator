@@ -5,8 +5,9 @@ import io,re,os
 d=os.path.dirname(os.path.abspath(__file__))
 r=lambda f: io.open(os.path.join(d,f),encoding="utf-8").read()
 h=r("index.html")
-h=h.replace('<link rel="stylesheet" href="forge.css">',"<style>\n"+r("forge.css")+"\n</style>")
-h=h.replace('<script src="forge-data.js"></script>\n<script src="forge-app.js"></script>',
-            "<script>\n"+r("forge-data.js")+"\n"+r("forge-app.js")+"\n</script>")
+h=re.sub(r'<link rel="stylesheet" href="forge\.css[^"]*">',lambda m:"<style>\n"+r("forge.css")+"\n</style>",h)
+h=re.sub(r'<script src="forge-data\.js[^"]*"></script>\s*<script src="forge-app\.js[^"]*"></script>',
+         lambda m:"<script>\n"+r("forge-data.js")+"\n"+r("forge-app.js")+"\n</script>",h)
+h=re.sub(r'<!-- Bump \?v=[^>]*-->\n?','',h)
 io.open(os.path.join(d,"forge-lesson-standalone.html"),"w",encoding="utf-8").write(h)
 print("wrote forge-lesson-standalone.html (%d KB)"%(len(h)//1024))
