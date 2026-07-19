@@ -366,7 +366,7 @@ async function aiGenerate(cfg,concept,ageStr,subject,duration,style,move){
    ===================================================================== */
 let lastInput=null, busy=false, activityStyle="5e", thresholdMove="words", lastActivity=null, activityView="teacher";
 async function generate(concept,ageStr,subject,duration){
-  if(busy) return;
+  if(busy){ toast("Still building the last activity — one moment."); return; }
   if(!concept.trim()||!ageStr.trim()){toast("Please enter both a concept and an age or grade.",true);return;}
   const style=activityStyle;
   const move=(style==="threshold")?thresholdMove:"words";
@@ -423,23 +423,30 @@ const EXAMPLES=[
 function buildChips(){
   $("#chips").innerHTML=EXAMPLES.map((e,i)=>{
     const tag=e.st==="threshold"?`<span class="chip-tag">Threshold</span> `:"";
-    return `<button class="chip" data-i="${i}">${tag}<span>${esc(e.c)}</span> <span class="age">· ${esc(e.a)}</span></button>`;
+    return `<button type="button" class="chip" data-i="${i}">${tag}<span>${esc(e.c)}</span> <span class="age">· ${esc(e.a)}</span></button>`;
   }).join("");
-  document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{
-    const e=EXAMPLES[+ch.dataset.i];
-    $("#concept").value=e.c; $("#age").value=e.a; $("#subject").value=e.s;
-    setStyle(e.st||"5e");
-    if(e.st==="threshold") setMove(e.mv||"words");
-    generate(e.c,e.a,e.s,"");
-  });
 }
+/* Delegated once on the container: works no matter which inner span is clicked,
+   and survives buildChips() re-rendering the buttons. */
+function runExample(i){
+  const e=EXAMPLES[i]; if(!e) return;
+  $("#concept").value=e.c; $("#age").value=e.a; $("#subject").value=e.s;
+  setStyle(e.st||"5e");
+  if(e.st==="threshold") setMove(e.mv||"words",false);
+  generate(e.c,e.a,e.s,"");
+}
+$("#chips").addEventListener("click",ev=>{
+  const ch=ev.target.closest(".chip"); if(!ch||!$("#chips").contains(ch)) return;
+  ev.preventDefault();
+  runExample(+ch.dataset.i);
+});
 
 /* ---------- wiring ---------- */
 $("#genForm").addEventListener("submit",ev=>{ev.preventDefault();
   generate($("#concept").value,$("#age").value,$("#subject").value,$("#duration").value);});
 $("#newBtn").onclick=()=>{ setView("teacher"); $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
   $("#landing").classList.remove("hidden"); window.scrollTo({top:0,behavior:"smooth"});};
-$("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); if(lastInput.move) setMove(lastInput.move); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
+$("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); if(lastInput.move) setMove(lastInput.move,false); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
 $("#printBtn").onclick=()=>window.print();
 $("#adjustBtn").onclick=()=>{ if(!lastInput)return;
   const next=prompt("New age or grade (e.g. 'Grade 8' or 'age 7'):",lastInput.ageStr);
@@ -511,7 +518,7 @@ function openLib(){
   }).join(""):`<p class="note-sm">Nothing saved yet. Generate an activity and press <b>Save</b>.</p>`;
   el.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const r=store.saved.find(x=>x.id===b.dataset.open); if(!r) return;
-    setStyle(r.style||"5e"); if(r.style==="threshold") setMove(r.move||"words");
+    setStyle(r.style||"5e"); if(r.style==="threshold") setMove(r.move||"words",false);
     if(r.input){ $("#concept").value=r.input.concept||""; $("#age").value=r.input.ageStr||""; $("#subject").value=r.input.subject||""; lastInput={...r.input,style:r.style,move:r.move}; }
     $("#libBg").classList.remove("show");
     renderActivity(r.activity);
@@ -539,12 +546,12 @@ function buildMoves(){
   ms.innerHTML=MOVES.map(m=>`<button type="button" data-move="${m.k}"${m.k===thresholdMove?' class="on"':''}>${esc(m.label)}</button>`).join("");
   ms.querySelectorAll("button").forEach(b=>b.onclick=()=>setMove(b.dataset.move));
 }
-function setMove(m){
+function setMove(m,rerender){
   const mv=MOVES.find(x=>x.k===m)||MOVES[0];
   thresholdMove=mv.k;
   document.querySelectorAll("#moveSeg button").forEach(b=>b.classList.toggle("on",b.dataset.move===thresholdMove));
   const mn=$("#moveNote"); if(mn) mn.textContent=mv.note;
-  if(lastActivity&&activityStyle==="threshold") renderActivity(lastActivity);
+  if(rerender!==false&&lastActivity&&activityStyle==="threshold") renderActivity(lastActivity);
 }
 
 document.querySelectorAll("#styleSeg button").forEach(b=>b.onclick=()=>setStyle(b.dataset.style));
