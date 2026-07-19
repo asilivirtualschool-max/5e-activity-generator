@@ -155,6 +155,38 @@
   .cb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
   .cb-chips span{background:rgba(0,0,0,.055);border-radius:999px;padding:5px 11px;font-size:13px;color:#33404a}
   .moveSeg button{flex:1 1 132px;min-width:132px}
+  .viewSeg{display:flex;gap:8px;margin-bottom:14px}
+  .viewSeg button{border:1px solid var(--border);background:#fff;font:inherit;font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:10px;cursor:pointer;color:var(--muted);transition:all .15s}
+  .viewSeg button.on{background:#faf3ea;border-color:var(--primary);color:var(--primary)}
+  .lib-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+  .lib-row:first-child{border-top:0}
+  .lib-i{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .lib-i b{font-size:14.5px}
+  .lib-i span{font-size:12.5px;color:var(--muted)}
+  .lib-d{font-size:11.5px!important;opacity:.75}
+  .lib-a{display:flex;gap:6px;flex-shrink:0}
+  .lib-a .btn{padding:6px 12px;font-size:13px}
+  .lib-del{color:#b03a4e}
+  .hs-head{border-bottom:3px solid var(--ink);padding-bottom:16px;margin-bottom:22px}
+  .hs-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:#555;margin-bottom:16px}
+  .hs-kicker{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .hs-head h1{font-size:27px;line-height:1.28;margin-top:8px}
+  .hs-box{border:2px solid var(--ink);border-radius:14px;padding:20px 22px;margin-bottom:20px;background:#fff;break-inside:avoid}
+  .hs-box h3{font-size:17px;margin:0 0 10px}
+  .hs-p{font-size:14.5px;line-height:1.55;color:#333;margin:0 0 12px}
+  .hs-claim{font-size:17px;font-weight:600;line-height:1.45;margin:0 0 12px;padding:12px 16px;background:#f6f2ec;border-left:4px solid var(--ink);border-radius:0 8px 8px 0}
+  .hs-chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+  .hs-chips span{border:1px solid #ccc;border-radius:999px;padding:6px 13px;font-size:13.5px}
+  .hs-t{width:100%;border-collapse:collapse;font-size:14.5px}
+  .hs-t th{text-align:left;padding:9px 10px;border:1px solid #bbb;background:#f4f0ea;font-size:13px}
+  .hs-t td{padding:9px 10px;border:1px solid #bbb;vertical-align:top}
+  .hs-blank{height:42px;width:45%}
+  .hw{margin-bottom:14px}
+  .hw-l{display:block;font-size:13.5px;font-weight:600;margin-bottom:9px}
+  .hw-b{height:30px;border-bottom:1.5px solid #b9b3aa;margin-bottom:11px}
+  .hs-final{background:#faf7f2}
+  .hs-foot{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
+  @media(max-width:560px){.lib-row{flex-direction:column;align-items:flex-start}}
   @media(max-width:560px){.pr-s{width:40%}}
   /* activity card */
   .card-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end;margin-bottom:20px}
@@ -219,6 +251,9 @@
   @media print{
     body{background:#fff!important}
     .no-print{display:none!important}
+    .hidden{display:none!important}
+    .hs-box,.hs-head{break-inside:avoid}
+    .hs-box{border-color:#000}
     .phase,.block,.hero-q{break-inside:avoid;box-shadow:none}
     main{padding-bottom:0}
   }
@@ -237,6 +272,7 @@
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       AI settings
     </button>
+    <button class="ghost" id="libBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Saved <span id="libCount"></span></button>
     <button class="ghost hidden" id="newBtn">← New activity</button>
   </div>
 </header>
@@ -295,18 +331,33 @@
 
   <!-- ACTIVITY -->
   <section id="activity" class="hidden">
+    <div class="viewSeg no-print" id="viewSeg">
+      <button type="button" data-view="teacher" class="on">Teacher plan</button>
+      <button type="button" data-view="student">Student handout</button>
+    </div>
     <div class="card-actions no-print">
+      <button class="btn" id="saveBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Save</button>
       <button class="btn" id="adjustBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Adjust age</button>
       <button class="btn" id="regenBtn"><svg id="regenIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Regenerate</button>
       <button class="btn primary" id="printBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Print / PDF</button>
     </div>
     <div id="activityBody"></div>
+    <div id="handoutBody" class="hidden"></div>
   </section>
 </main>
 
 <footer>Made for teachers. Every activity is a starting point — trust your judgment in the classroom.</footer>
 
 <!-- SETTINGS MODAL -->
+<div class="modal-bg" id="libBg">
+  <div class="modal">
+    <h2>Saved lessons</h2>
+    <p class="sub">Stored in this browser only. Saving keeps the whole lesson — including the construction move you chose — so it reopens exactly as you left it.</p>
+    <div id="libList"></div>
+    <div class="actions"><button class="btn" id="libClose">Close</button></div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h2>AI generation settings</h2>
@@ -332,7 +383,9 @@
 const $ = s => document.querySelector(s);
 const store = {
   get k(){ try{return JSON.parse(localStorage.getItem("spark_ai")||"null")}catch(e){return null} },
-  set k(v){ v? localStorage.setItem("spark_ai",JSON.stringify(v)) : localStorage.removeItem("spark_ai") }
+  set k(v){ v? localStorage.setItem("spark_ai",JSON.stringify(v)) : localStorage.removeItem("spark_ai") },
+  get saved(){ try{return JSON.parse(localStorage.getItem("forge_saved")||"[]")}catch(e){return []} },
+  set saved(v){ try{localStorage.setItem("forge_saved",JSON.stringify(v||[]))}catch(e){} }
 };
 function toast(msg,isErr){
   const t=$("#toast"); t.textContent=msg; t.className="toast show"+(isErr?" err":"");
@@ -379,6 +432,41 @@ const ico=(p,w=16)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="n
 
 /* ---------- render an activity object ---------- */
 function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+/* ---------- STUDENT HANDOUT — deliberately withholds every reveal ---------- */
+function renderHandout(a,isThr,move){
+  const MV=MOVES.find(m=>m.k===move)||MOVES[0];
+  const line=(l,n)=>`<div class="hw"><span class="hw-l">${l}</span>${Array.from({length:n||1},()=>'<div class="hw-b"></div>').join("")}</div>`;
+  const say=t=>`<p class="hs-p">${esc(t)}</p>`;
+  let task="";
+  if(isThr&&move==="words"&&a.lexicon&&a.lexicon.length){
+    task=`<div class="hs-box"><h3>Make up your own words</h3>${say("Your group invents a brand-new word for each thing below. Do not use the real word — you may not know it yet. From now on, use only your own words when you explain what is happening.")}<table class="hs-t"><thead><tr><th>Invent a name for…</th><th>Our made-up word</th></tr></thead><tbody>${a.lexicon.map(l=>`<tr><td>${esc(l.slot)}</td><td class="hs-blank"></td></tr>`).join("")}</tbody></table></div>`;
+  } else if(isThr&&move==="rule"){
+    task=`<div class="hs-box"><h3>Work out the rule yourself</h3>${say("Gather your evidence first. Then write the rule you think is always true — in your own words, before anyone tells you the answer.")}${line("What we noticed",3)}${line("Our rule — what we think is ALWAYS true",2)}${line("A case we tested it on",1)}</div>`;
+  } else if(isThr&&move==="sort"){
+    const S=a.sort||{};
+    task=`<div class="hs-box"><h3>Sort them into your own groups</h3>${say(S.task||"Sort the cases into groups of your own making, name each group, then write the rule that decides which group something belongs to.")}${(S.items&&S.items.length)?`<div class="hs-chips">${S.items.map(i=>`<span>${esc(i)}</span>`).join("")}</div>`:""}${line("Our groups, and what we called them",3)}${line("The rule that decides which group something goes in",2)}</div>`;
+  } else if(isThr&&move==="poe"){
+    const P=a.poe||{};
+    task=`<div class="hs-box"><h3>Predict, observe, explain</h3>${P.scenario?say("What you will see: "+P.scenario):""}${say("Write your prediction BEFORE you watch. Do not change it afterwards — a wrong prediction is useful.")}${line("We predict… and why",2)}${line("What actually happened",2)}${line("How we explain it now",2)}</div>`;
+  } else if(isThr&&move==="counter"){
+    const C=a.counter||{};
+    task=`<div class="hs-box"><h3>Break the claim</h3>${say("Here is a claim that sounds right. Your job is to prove it wrong.")}${C.claim?`<p class="hs-claim">&ldquo;${esc(C.claim)}&rdquo;</p>`:""}${C.hunt?say(C.hunt):""}${line("The case that breaks it",2)}${line("What the claim should have said instead",2)}</div>`;
+  } else if(isThr&&move==="model"){
+    const D=a.model||{};
+    task=`<div class="hs-box"><h3>Build a model</h3>${D.build?say("Build: "+D.build):""}${D.test?say("Then test it: "+D.test):""}${line("What our model shows",2)}${line("Where our model breaks down",2)}</div>`;
+  } else {
+    task=`<div class="hs-box"><h3>Our investigation</h3>${line("What we are trying to find out",1)}${line("What we did",3)}${line("What we found",3)}${line("What we think this means",2)}</div>`;
+  }
+  $("#handoutBody").innerHTML=`
+    <section class="hs-head">
+      <div class="hs-meta"><span>Name / group ____________________</span><span>Date ____________</span></div>
+      <div class="hs-kicker">Our question</div>
+      <h1>${esc(a.drivingQuestion)}</h1>
+    </section>
+    ${task}
+    <div class="hs-box hs-final"><h3>Explain it to someone else</h3>${say("Explain what you worked out to a person who was not here. Use your own words.")}${line("",3)}</div>
+    <p class="hs-foot">${esc(a.activityTitle)} · ${esc(a.ageBand)}</p>`;
+}
 function renderActivity(a){
   lastActivity=a;
   const isThr=!!(a.lexicon||a.troublesome||a.rule);
@@ -467,6 +555,8 @@ function renderActivity(a){
       <div class="block"><div class="h">${ico('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',14)} Materials</div>${mats}</div>
     </div>
     <div class="phases"><h2>${isThr?"Construct → Formalise → Transfer":"The 5E Lesson"}</h2>${phases}</div>${transferHtml}${progHtml}${pedagogyHtml}`;
+  renderHandout(a,isThr,move);
+  applyView();
   $("#landing").classList.add("hidden");
   $("#activity").classList.remove("hidden");
   $("#newBtn").classList.remove("hidden");
@@ -1119,7 +1209,7 @@ async function aiGenerate(cfg,concept,ageStr,subject,duration,style,move){
 /* =====================================================================
    ORCHESTRATION
    ===================================================================== */
-let lastInput=null, busy=false, activityStyle="5e", thresholdMove="words", lastActivity=null;
+let lastInput=null, busy=false, activityStyle="5e", thresholdMove="words", lastActivity=null, activityView="teacher";
 async function generate(concept,ageStr,subject,duration){
   if(busy) return;
   if(!concept.trim()||!ageStr.trim()){toast("Please enter both a concept and an age or grade.",true);return;}
@@ -1192,7 +1282,7 @@ function buildChips(){
 /* ---------- wiring ---------- */
 $("#genForm").addEventListener("submit",ev=>{ev.preventDefault();
   generate($("#concept").value,$("#age").value,$("#subject").value,$("#duration").value);});
-$("#newBtn").onclick=()=>{ $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
+$("#newBtn").onclick=()=>{ setView("teacher"); $("#activity").classList.add("hidden"); $("#newBtn").classList.add("hidden");
   $("#landing").classList.remove("hidden"); window.scrollTo({top:0,behavior:"smooth"});};
 $("#regenBtn").onclick=()=>{ if(lastInput){ setStyle(lastInput.style||"5e"); if(lastInput.move) setMove(lastInput.move); generate(lastInput.concept,lastInput.ageStr,lastInput.subject,lastInput.duration);} };
 $("#printBtn").onclick=()=>window.print();
@@ -1229,6 +1319,57 @@ $("#saveKey").onclick=()=>{
 };
 $("#clearKey").onclick=()=>{ store.k=null; $("#apiKey").value=""; refreshKeybar();
   toast("Key removed. Back to library + template mode."); };
+
+/* ---------- teacher / student view ---------- */
+function applyView(){
+  const st=activityView==="student";
+  $("#activityBody").classList.toggle("hidden",st);
+  $("#handoutBody").classList.toggle("hidden",!st);
+  document.querySelectorAll("#viewSeg button").forEach(b=>b.classList.toggle("on",(b.dataset.view==="student")===st));
+  const pb=$("#printBtn"); if(pb) pb.lastChild.textContent=st?"Print handout":"Print / PDF";
+}
+function setView(v){ activityView=(v==="student")?"student":"teacher"; applyView(); }
+document.querySelectorAll("#viewSeg button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+
+/* ---------- saved lessons ---------- */
+function refreshLib(){
+  const n=store.saved.length; const c=$("#libCount");
+  if(c) c.textContent=n?`(${n})`:"";
+}
+function saveCurrent(){
+  if(!lastActivity){ toast("Generate an activity first.",true); return; }
+  const list=store.saved;
+  const rec={id:Date.now()+"", savedAt:new Date().toISOString(), style:activityStyle, move:thresholdMove,
+             input:lastInput?{concept:lastInput.concept,ageStr:lastInput.ageStr,subject:lastInput.subject,duration:lastInput.duration}:null,
+             activity:lastActivity};
+  list.unshift(rec);
+  store.saved=list.slice(0,60);
+  refreshLib(); toast("Saved. Open it any time from Saved in the header.");
+}
+function openLib(){
+  const list=store.saved; const el=$("#libList");
+  el.innerHTML=list.length?list.map(r=>{
+    const mv=MOVES.find(m=>m.k===r.move);
+    const badge=r.style==="threshold"?`Threshold · ${esc(mv?mv.label:r.move)}`:"5E Inquiry";
+    const d=new Date(r.savedAt);
+    return `<div class="lib-row"><div class="lib-i"><b>${esc(r.activity.activityTitle||"Untitled")}</b><span>${esc(r.activity.ageBand||"")} · ${badge}</span><span class="lib-d">${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span></div><div class="lib-a"><button class="btn" data-open="${r.id}">Open</button><button class="btn lib-del" data-del="${r.id}">Delete</button></div></div>`;
+  }).join(""):`<p class="note-sm">Nothing saved yet. Generate an activity and press <b>Save</b>.</p>`;
+  el.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    const r=store.saved.find(x=>x.id===b.dataset.open); if(!r) return;
+    setStyle(r.style||"5e"); if(r.style==="threshold") setMove(r.move||"words");
+    if(r.input){ $("#concept").value=r.input.concept||""; $("#age").value=r.input.ageStr||""; $("#subject").value=r.input.subject||""; lastInput={...r.input,style:r.style,move:r.move}; }
+    $("#libBg").classList.remove("show");
+    renderActivity(r.activity);
+  });
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    store.saved=store.saved.filter(x=>x.id!==b.dataset.del); refreshLib(); openLib();
+  });
+  $("#libBg").classList.add("show");
+}
+$("#saveBtn").onclick=saveCurrent;
+$("#libBtn").onclick=openLib;
+$("#libClose").onclick=()=>$("#libBg").classList.remove("show");
+$("#libBg").onclick=e=>{ if(e.target.id==="libBg") $("#libBg").classList.remove("show"); };
 
 /* init */
 function setStyle(s){
