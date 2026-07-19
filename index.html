@@ -139,6 +139,22 @@
   .pr-s{width:32%}
   .pr-s b{display:block;color:var(--primary);font-size:14.5px}
   .pr-s span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+  .cbox{margin-top:18px;border-radius:20px;padding:22px 24px;border:1px solid #e6e2da;background:#fff}
+  .cb-sort{background:linear-gradient(135deg,#fdf5e9,#fbeeda);border-color:#f0dcbc;--acc:#b8590c}
+  .cb-poe{background:linear-gradient(135deg,#eaf3fb,#e2eef9);border-color:#cfe1f2;--acc:#1f6aa8}
+  .cb-counter{background:linear-gradient(135deg,#fdeef0,#fbe6e9);border-color:#f3d3d9;--acc:#b03a4e}
+  .cb-model{background:linear-gradient(135deg,#eef7f1,#e6f2ec);border-color:#cee7da;--acc:#2f7d5a}
+  .cb-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)}
+  .cb-sub{margin:10px 0 14px;font-size:14px;color:#4a4a4a}
+  .cb-row{background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px}
+  .cb-row:last-child{margin-bottom:0}
+  .cb-l{display:block;font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.06em}
+  .cb-row p{margin:6px 0 0;font-size:14.5px;line-height:1.55;color:#23303a}
+  .cb-teach{background:#fffdf3;border:1px dashed rgba(0,0,0,.16)}
+  .cb-blank{height:40px;border-bottom:2px dashed rgba(0,0,0,.16);margin-top:8px}
+  .cb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .cb-chips span{background:rgba(0,0,0,.055);border-radius:999px;padding:5px 11px;font-size:13px;color:#33404a}
+  .moveSeg button{flex:1 1 132px;min-width:132px}
   @media(max-width:560px){.pr-s{width:40%}}
   /* activity card */
   .card-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end;margin-bottom:20px}
@@ -246,10 +262,7 @@
           <button type="button" data-style="threshold">Threshold · invent the words</button>
         </div>
         <div class="note-sm" id="styleNote"></div>
-        <div class="moveSeg hidden" id="moveSeg">
-          <button type="button" data-move="words" class="on">Invent the words</button>
-          <button type="button" data-move="rule">Generate the rule</button>
-        </div>
+        <div class="moveSeg hidden" id="moveSeg"></div>
         <div class="note-sm" id="moveNote"></div>
       </div>
       <div class="row">
@@ -354,6 +367,14 @@ const THRESHOLD_PHASE_META=[
   {key:"elaborate",step:"Transfer · later lesson",desc:"Apply to a new context — deferred",color:"var(--elaborate)",icon:PHASE_META[3].icon},
   {key:"evaluate",step:"Check",desc:"Show understanding two ways",color:"var(--evaluate)",icon:PHASE_META[4].icon}
 ];
+const MOVES=[
+  {k:"words",label:"Invent the words",gerund:"word-inventing",note:"Students coin their own made-up word for each part before any formal term is introduced.",icon:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>'},
+  {k:"rule",label:"Generate the rule",gerund:"rule-forming",note:"Students gather evidence and write their own generalisation before the formal rule is revealed.",icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+  {k:"sort",label:"Sort and classify",gerund:"category-building",note:"Students build the categories themselves from a set of cases, and must defend where the boundary falls.",icon:'<path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/>'},
+  {k:"poe",label:"Predict–observe–explain",gerund:"predicting and testing",note:"Students commit a prediction to writing first, so the surprise does the teaching when observation contradicts it.",icon:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'},
+  {k:"counter",label:"Find the counter-example",gerund:"counter-example hunting",note:"Students are handed an almost-right claim — often their own misconception — and must break it with a real case.",icon:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/>'},
+  {k:"model",label:"Build a model",gerund:"model-building",note:"Students build a physical or drawn model of the mechanism, then deliberately find where it breaks.",icon:'<path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>'}
+];
 const ico=(p,w=16)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 
 /* ---------- render an activity object ---------- */
@@ -394,7 +415,36 @@ function renderActivity(a){
   const lexHtml=(a.lexicon&&a.lexicon.length)?`<section class="lexicon print-break"><div class="lx-h">${ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',15)} Invent the words — students coin their own names first</div><p class="lx-sub">Before any formal term is given, each group makes up its OWN word for every part below and uses only those words during Explore. In Explain, reveal the real term beside the word students already invented.</p><table class="lx-t"><thead><tr><th>Students invent a name for…</th><th>Their made-up word</th><th>Formal term (reveal in Explain)</th></tr></thead><tbody>${a.lexicon.map(l=>`<tr><td>${esc(l.slot)}</td><td class="lx-blank">${esc(l.coin||"")}</td><td class="lx-real">${esc(l.reveal)}</td></tr>`).join("")}</tbody></table></section>`:"";
   const troubleHtml=(isThr&&a.troublesome)?`<section class="trouble"><div class="tr-h">${ico('<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',14)} Troublesome knowledge — the idea that trips learners up</div><p>${esc(a.troublesome)}</p></section>`:"";
   const ruleHtml=(isThr&&a.rule)?`<section class="rulebox print-break"><div class="lx-h">${ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',15)} Generate the rule — students form the generalisation first</div><p class="lx-sub">Before the teacher states any rule, each group writes its OWN general statement of what always happens, drawn from their evidence. Then compare it with the formal generalisation below.</p><div class="rule-write"><span class="rw-l">Our rule (students write)</span><div class="rw-blank"></div></div><div class="rule-real"><span class="rr-l">The formal generalisation — reveal after</span><p>${esc(a.rule)}</p></div></section>`:"";
-  const constructHtml=isThr?(move==="rule"?ruleHtml:lexHtml):"";
+  const MV=MOVES.find(m=>m.k===move)||MOVES[0];
+  const cbRow=(l,t)=>`<div class="cb-row"><span class="cb-l">${l}</span><p>${esc(t)}</p></div>`;
+  const cbTeach=(l,t)=>`<div class="cb-row cb-teach"><span class="cb-l">${l}</span><p>${esc(t)}</p></div>`;
+  const cbWrite=l=>`<div class="cb-row"><span class="cb-l">${l}</span><div class="cb-blank"></div></div>`;
+  const cbox=(title,sub,inner)=>`<section class="cbox print-break cb-${move}"><div class="cb-h">${ico(MV.icon,15)} ${title}</div><p class="cb-sub">${sub}</p>${inner}</section>`;
+  let constructHtml="";
+  if(isThr){
+    if(move==="rule") constructHtml=ruleHtml;
+    else if(move==="sort"){const S=a.sort||{};
+      constructHtml=cbox("Sort and classify — students build the categories","Do not hand over the categories. Students group the cases themselves, name each group, then defend where the boundary falls — the boundary IS the concept.",
+        (S.items&&S.items.length?`<div class="cb-row"><span class="cb-l">Cases to sort</span><div class="cb-chips">${S.items.map(i=>`<span>${esc(i)}</span>`).join("")}</div></div>`:"")
+        +cbRow("The task",S.task||"Sort the cases into groups of your own making, name each group, then state the rule that decides which group something belongs to.")
+        +cbWrite("Our groups, and the rule for the boundary"));}
+    else if(move==="poe"){const P=a.poe||{};
+      constructHtml=cbox("Predict – observe – explain","Students must commit a prediction to writing BEFORE observing. The surprise is what does the teaching, and it only works if the prediction is already on record.",
+        cbRow("The situation",P.scenario||"Set up the situation the concept explains, and show it to students without commentary.")
+        +(P.tempting?cbTeach("Expect this prediction — teacher note",P.tempting):"")
+        +cbWrite("We predict… (write this before observing)")+cbWrite("We observed…")+cbWrite("We explain…"));}
+    else if(move==="counter"){const C=a.counter||{};
+      constructHtml=cbox("Find the counter-example","Hand students a claim that is almost right — often the very misconception they already hold. Their job is to break it with a real case, then repair it.",
+        cbRow("The claim to attack",C.claim||"State the intuitive claim most learners believe about this concept.")
+        +cbRow("The hunt",C.hunt||"Find a real case where the claim fails, then say what it should have said instead.")
+        +cbWrite("The case that breaks it")+cbWrite("What the claim should have said"));}
+    else if(move==="model"){const D=a.model||{};
+      constructHtml=cbox("Build a model","Students build a physical or drawn model of the mechanism, then deliberately find where it breaks. The limits of the model are where the understanding sharpens.",
+        cbRow("Build",D.build||"Build a physical or drawn model showing how the concept works.")
+        +cbRow("Test",D.test||"Test the model against a case it was not built for.")
+        +cbWrite("Where our model breaks down"));}
+    else constructHtml=lexHtml;
+  }
   const L=a.liminal||null;
   const liminalHtml=(isThr&&L)?`<section class="liminal print-break"><div class="lm-h">${ico('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',15)} The liminal space — where students get stuck (and should)</div><p class="lm-sub">Being stuck here is not a failure of the lesson; it is the lesson. Recognise it, then hold students in it long enough for the idea to reorganise.</p><div class="lm-cols"><div class="lm-col"><div class="lm-l">Looks like</div><ul>${(L.looks||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="lm-col"><div class="lm-l">Sounds like</div><ul class="lm-say">${(L.sounds||[]).map(x=>`<li>&ldquo;${esc(x)}&rdquo;</li>`).join("")}</ul></div></div><div class="lm-hold"><div class="lm-l">Teacher moves that hold, not rescue</div><ol>${(L.hold||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div></section>`:"";
   const TF=a.transfer||null;
@@ -402,7 +452,7 @@ function renderActivity(a){
   const PROG=[{k:"preliminal",n:"Pre-liminal",d:"Has not yet met the trouble"},{k:"liminal",n:"Liminal",d:"In the stuck, in-between state"},{k:"crossed",n:"Crossed",d:"Has passed through the threshold"},{k:"integrated",n:"Integrated",d:"Uses it without being prompted"}];
   const PR=a.progression||null;
   const progHtml=(isThr&&PR)?`<section class="progression print-break"><div class="pr-h">${ico('<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',15)} Has the student crossed? — threshold progression</div><p class="pr-sub">Use this in place of a generic rubric. Progress through a threshold is not linear — students can sit in the liminal band for some time, and often move back before moving on.</p><table class="pr-t"><thead><tr><th>Stage</th><th>What that looks like in this concept</th></tr></thead><tbody>${PROG.map(g=>`<tr><td class="pr-s"><b>${g.n}</b><span>${g.d}</span></td><td>${esc(PR[g.k]||"")}</td></tr>`).join("")}</tbody></table></section>`:"";
-  const pedagogyHtml=isThr?`<section class="pedagogy"><div class="pg-h">How this threshold lesson is sequenced</div><p><b>Engagement sits inside the construction.</b> There is no separate hook — curiosity comes from meeting the phenomenon while students build meaning, so the ${move==="rule"?"rule-forming":"word-inventing"} IS the engagement. <b>The liminal space is planned for, not designed away.</b> Students are expected to get stuck; the teacher's job is to hold them there productively rather than rescue them with the answer. <b>Transfer comes later.</b> Applying the idea to new contexts is deliberately deferred to a follow-up lesson, once the core meaning is secure.</p></section>`:"";
+  const pedagogyHtml=isThr?`<section class="pedagogy"><div class="pg-h">How this threshold lesson is sequenced</div><p><b>Engagement sits inside the construction.</b> There is no separate hook — curiosity comes from meeting the phenomenon while students build meaning, so the ${MV.gerund} IS the engagement. <b>The liminal space is planned for, not designed away.</b> Students are expected to get stuck; the teacher's job is to hold them there productively rather than rescue them with the answer. <b>Transfer comes later.</b> Applying the idea to new contexts is deliberately deferred to a follow-up lesson, once the core meaning is secure.</p></section>`:"";
   $("#activityBody").innerHTML=`
     <section class="hero-q">
       <div class="kicker">${ico('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',14)} Driving Question</div>
@@ -431,6 +481,10 @@ const LIBRARY=[
     style:"threshold",
     match:["density","float","floating","floats","sink","sinks","sinking","why things float","buoyancy","dense"],
     activityTitle:"Why Ships Float and Nails Sink",
+    sort:{"items": ["Steel nail", "Cork", "Marble", "Foam block", "Coin", "Candle wax", "Foil squashed into a ball", "The same foil shaped into a boat"], "task": "Sort them into groups by what they do in water, then find a second way to sort them that cuts across the first — and name the property your second sort is really tracking."},
+    poe:{"scenario": "The same square of foil, first squashed into a tight ball, then opened out into a boat shape — both lowered into water.", "tempting": "That both will do the same thing, because it is the same foil and exactly the same weight."},
+    counter:{"claim": "Heavy things sink and light things float.", "hunt": "Find something heavy that floats and something light that sinks — then say what the claim should have been about, instead of weight."},
+    model:{"build": "Build the same amount of matter packed into two different amounts of space — for example an equal number of marbles in a small box and in a large box.", "test": "Predict which arrangement would float, then check it against the foil ball and the foil boat."},
     liminal:{"looks": ["Keep sorting objects by size, or by how heavy they feel in the hand", "Re-weigh the same object hoping for a different answer", "Abandon the foil boat after one failed attempt and go back to the ball", "Split into two camps and stop testing altogether"], "sounds": ["It's heavy so it sinks.", "But the ship IS heavy, so this doesn't work.", "Can you just tell us the answer?", "Ours floated but it shouldn't have."], "hold": ["Do not supply the word density. Put the contradiction back to them: 'You said heavy sinks. Here is a heavy thing floating. Both are true — what has to change in your idea?'", "Hand them a same-mass pair (foil ball and foil boat) and ask which one their current rule predicts will float.", "Say out loud that being stuck here is the point, and that you expect it to take a while.", "Ask them to write down the rule that is currently failing before they write a new one."]},
     transfer:{"when": "A week later, once packed-ness is stable enough to survive a new context.", "task": "Give a hot-air balloon, an oil spill sitting on water, and a submarine's ballast tanks — none of them a solid dropped into water — and ask students to explain all three with the same single idea.", "lookFor": "Whether they reach for packed-ness compared with the surrounding fluid without prompting, and whether the idea survives moving from solids to a liquid and a gas."},
     progression:{"preliminal": "Explains floating by size or weight alone; treats the steel ship as a trick or an exception.", "liminal": "Knows that weight alone fails and can say why, but flips between explanations and cannot yet predict a new object reliably.", "crossed": "Uses packed-ness compared with water to predict and explain floating for new objects, including the foil ball and the foil boat.", "integrated": "Applies the idea unprompted to unfamiliar fluids and situations, and uses mass and volume together to justify it."},
@@ -462,6 +516,10 @@ const LIBRARY=[
     style:"threshold",
     match:["circuit","circuits","electric","electricity","light a bulb","battery and bulb","current","series circuit","open circuit","closed circuit"],
     activityTitle:"The Bulb That Needs a Full Loop",
+    sort:{"items": ["Bulb touching one battery end", "Bulb wired to both ends", "Two wires meeting in mid-air", "A loop with a gap held open", "A loop with the gap pinched shut", "A loop with a paperclip bridging the gap"], "task": "Sort these arrangements into lights and does not light by predicting first, then testing — and name the single feature that decides which pile each one belongs in."},
+    poe:{"scenario": "A working circuit in which one wire is lifted off the battery for two seconds and then put back.", "tempting": "That the bulb will stay lit briefly or fade gradually, because the electricity already inside the wire keeps going."},
+    counter:{"claim": "More batteries always make the bulb brighter.", "hunt": "Build a case with two batteries where the bulb does not light at all — then say what the claim left out."},
+    model:{"build": "Model the circuit as a ring of students passing a ball hand to hand, with the battery as the one who pushes it along.", "test": "Have one student refuse to pass, then ask whether the ball piles up or the whole loop stops — and check that against the real circuit."},
     liminal:{"looks": ["Touch one wire to the battery and wait for the bulb to light", "Add more wires or a second battery instead of tracing the path", "Swap the bulb, assuming it is broken", "Build a working circuit by accident but cannot rebuild it"], "sounds": ["The electricity comes out of this end and goes into the bulb.", "It needs more power.", "The bulb's dead.", "It worked before, I don't know why."], "hold": ["Do not trace the loop for them. Ask them to point with a finger and narrate the whole journey out loud — stop them at the first gap.", "Give them a deliberately broken circuit and require a prediction before they test it.", "When a group succeeds by accident, take it apart and ask them to rebuild it from their own drawing.", "Ask 'where does it get back to?' rather than 'is it connected?'"]},
     transfer:{"when": "The following week, once tracing the loop has become automatic.", "task": "Give a string of decorative lights with one bulb removed, a torch that has been dropped, and a fridge door light — ask what is broken and why — then have them design a switch for a classroom display.", "lookFor": "Whether they check for a complete return path first, rather than blaming the battery or the bulb."},
     progression:{"preliminal": "Thinks electricity travels out to the bulb and is used up; believes one contact should be enough.", "liminal": "Says the words 'complete circuit' but still troubleshoots by swapping parts rather than tracing the path.", "crossed": "Traces the full loop to diagnose a broken circuit and predicts correctly before testing.", "integrated": "Designs and explains switches and multi-component circuits, reasoning about making and breaking the loop in unfamiliar devices."},
@@ -493,6 +551,10 @@ const LIBRARY=[
     style:"threshold",
     match:["adjective","adjectives","describing word","describing words","parts of speech","noun and adjective","describing words"],
     activityTitle:"The Words That Change the Picture",
+    sort:{"items": ["cracked", "nice", "enormous", "good", "abandoned", "interesting", "frozen", "special"], "task": "Sort these words into ones that change the picture in your head and ones that do not — then say what every word in the useful pile has in common."},
+    poe:{"scenario": "The sentence A dog sat by the door, read aloud twice — once with old, shivering added and once with huge, snarling added.", "tempting": "That adding words simply makes the sentence longer or more descriptive, rather than changing what the reader actually sees."},
+    counter:{"claim": "Longer and fancier describing words always make writing better.", "hunt": "Find a sentence that gets worse when you add an impressive-sounding adjective — then say what that adjective failed to do."},
+    model:{"build": "Draw the picture in your head from a bare sentence, then draw it again after one describing word is added.", "test": "Swap in a different adjective and see whether the drawing has to change — if it does not, the word was doing no work."},
     liminal:{"looks": ["Offer nouns or verbs when asked for describing words", "Add words anywhere in the sentence without checking the effect", "Judge a word by whether it is fancy rather than by what it does", "Spot adjectives in the example but not in their own writing"], "sounds": ["Is 'run' an adjective? It's a good word.", "I put in more describing words — is that enough?", "It's an adjective because it's long."], "hold": ["Do not give the definition. Keep returning to the picture: 'Read me your sentence. Now what did that word change in my head?'", "Offer a word that adds nothing (nice) beside one that changes everything (cracked) and ask which is doing more work.", "Ask them to delete a word and say exactly what was lost.", "Resist correcting a wrong label — ask what job that word is doing instead."]},
     transfer:{"when": "A later lesson, inside real writing rather than word lists.", "task": "Give a deliberately flat paragraph and a mood to create (menacing, joyful, abandoned) and allow them to change only the describing words to hit it.", "lookFor": "Whether they choose words for the picture created rather than for length or fanciness, and whether they can say what each choice changed."},
     progression:{"preliminal": "Labels words as adjectives by feel or by how impressive they sound; may name nouns or verbs instead.", "liminal": "Can pick adjectives out of a given sentence but adds them randomly in own writing without controlling the effect.", "crossed": "Chooses adjectives deliberately to change the reader's picture and can explain what each one changed.", "integrated": "Controls mood and precision in extended writing, and can judge when an adjective is doing no work and should be cut."},
@@ -523,6 +585,10 @@ const LIBRARY=[
     style:"threshold",
     match:["metaphor","simile","figurative","figurative language","figures of speech","literal and figurative","imagery"],
     activityTitle:"When the Classroom Is a Zoo",
+    sort:{"items": ["The classroom is a zoo", "She runs like the wind", "He is a rock", "The sky wept", "My bag weighs a tonne", "The lesson was as long as a year"], "task": "Sort these by HOW the comparison is made, not by what they are about — then name the method each group uses."},
+    poe:{"scenario": "Reading the classroom is a zoo aloud to someone who has never heard the phrase before, and asking them what it means.", "tempting": "That they will be confused or take it literally, because the sentence is factually false."},
+    counter:{"claim": "A metaphor is just a comparison, so any two things can be joined by the word is.", "hunt": "Find a pairing that produces nonsense (the classroom is a spreadsheet) and one that works — then say what the working pair shares that the nonsense pair does not."},
+    model:{"build": "Draw two boxes, one for each thing being compared, and a single arrow for the one quality that travels between them.", "test": "List what does NOT travel — no cages, no lions — and check the metaphor still works without it."},
     liminal:{"looks": ["Object that the sentence is simply untrue", "Try to make it literally true (there are no animals here)", "Treat every figurative sentence as a simile", "Explain a metaphor by restating it in the same words"], "sounds": ["But it's not actually a zoo.", "That's just wrong though.", "It means the classroom is a zoo.", "Is it a metaphor if it has 'like' in it?"], "hold": ["Do not resolve the falseness — sit in it: 'You're right, it's false. And everyone still knows exactly what it means. How is that possible?'", "Ask what quality travelled from the zoo to the classroom, and what did NOT travel (no cages, no lions).", "Offer a bad metaphor (the classroom is a spreadsheet) and ask why it fails.", "Let the discomfort of a true-but-false sentence stand rather than explaining it away."]},
     transfer:{"when": "A later lesson, using texts the students did not write.", "task": "Give a song lyric, a line of sports commentary, and a news headline; ask them to name the transferred quality in each, then write a replacement metaphor that transfers a different quality.", "lookFor": "Whether they name the shared quality rather than paraphrasing, and whether they can explain why a weak metaphor fails."},
     progression:{"preliminal": "Treats figurative sentences as errors or lies, or reads them literally.", "liminal": "Accepts that the sentence means something, but explains it by restating it, and confuses metaphor with simile.", "crossed": "Names the quality being transferred and distinguishes metaphor from simile by how the comparison is made.", "integrated": "Creates and evaluates metaphors for effect in own writing, and judges why some comparisons work better than others."},
@@ -554,6 +620,10 @@ const LIBRARY=[
     style:"threshold",
     match:["complete sentence","sentence vs fragment","subject and predicate","fragment","what makes a sentence","subject predicate","complete thought"],
     activityTitle:"When Words Become a Complete Thought",
+    sort:{"items": ["Birds sing.", "Running through the tall wet grass at dawn", "The enormous, rusting, half-forgotten ship", "It rained.", "Because she forgot her umbrella", "The cat slept."], "task": "Sort these into finished and leaves you hanging — then say what every item in the finished pile has that the others do not."},
+    poe:{"scenario": "A long fragment read aloud, then a two-word sentence read aloud, both with a full stop at the end.", "tempting": "That the longer one will feel more like a sentence, because there is so much more in it."},
+    counter:{"claim": "If it starts with a capital and ends with a full stop, it is a sentence.", "hunt": "Find a group of words that has both and still leaves the reader waiting — then say what punctuation cannot fix."},
+    model:{"build": "Model each sentence as two cards: a WHO or WHAT card, and a WHAT ABOUT THEM card.", "test": "Try to make both cards for a fragment, and see which card comes up empty."},
     liminal:{"looks": ["Judge completeness by length", "Add a capital and a full stop to a fragment and call it fixed", "Write long run-ons with confidence", "Fix the example but miss the same fault in their own work"], "sounds": ["It's long so it's a sentence.", "I put a capital and a full stop.", "It sounds finished.", "Which bit is missing? It all makes sense to me."], "hold": ["Do not name subject and predicate yet. Read the fragment aloud, stop, and wait — let the unfinished feeling do the work.", "Ask 'who or what, and what about them?' and then stay silent.", "Put a very short complete sentence (Birds sing.) beside a long fragment (running through the tall wet grass at dawn) and ask which is finished.", "Refuse to repair it for them — ask what question the reader is left holding."]},
     transfer:{"when": "A later lesson, applied to their own drafts rather than to given examples.", "task": "Have them audit a piece of their own writing from a previous week, marking every group of words that leaves the reader hanging, and repair each one.", "lookFor": "Whether they test for who/what plus what about them, rather than checking punctuation or counting words."},
     progression:{"preliminal": "Judges sentences by length, punctuation, or whether the words sound interesting.", "liminal": "Senses that something is missing and can say a fragment feels unfinished, but cannot identify what is absent.", "crossed": "Identifies subject and predicate and repairs fragments reliably in given text.", "integrated": "Applies the test unprompted while drafting and editing own writing, including with complex sentences."},
@@ -585,6 +655,10 @@ const LIBRARY=[
     style:"threshold",
     match:["comma","commas","punctuation","punctuate","comma rules","using commas"],
     activityTitle:"The Comma That Saved Grandma",
+    sort:{"items": ["Let's eat Grandma", "Let's eat, Grandma", "I invited my parents, JK Rowling and a clown", "I invited my parents, JK Rowling, and a clown", "She left, happily", "She left happily"], "task": "These come in near-identical pairs. Sort each pair by what actually changes between them — then name the job the comma is doing in each case."},
+    poe:{"scenario": "The same list of guests read aloud twice, once with a comma before the final item and once without.", "tempting": "That the comma only changes where you breathe, so the meaning stays exactly the same."},
+    counter:{"claim": "You put a comma wherever you would pause for breath.", "hunt": "Find a sentence where the natural pause and the correct comma fall in different places — then say what the comma is really tracking."},
+    model:{"build": "Model the sentence as a set of parcels, with commas as the string that decides which words get bundled together.", "test": "Move one comma, re-bundle the parcels, and say exactly who or what changed."},
     liminal:{"looks": ["Sprinkle commas wherever they would pause for breath", "Read both versions of the sentence identically", "Add commas to make writing look more sophisticated", "Delete every comma when unsure"], "sounds": ["You put one where you breathe.", "They mean the same thing.", "I just put them where it looks right.", "Does it even matter?"], "hold": ["Do not give the rules. Make them perform both readings aloud until the two meanings separate audibly, then ask which one the writer wanted.", "Ask 'who is being spoken to here?' for each version.", "Give a sentence where the comma decides who eats and who is eaten, and let them argue it out.", "Do not accept 'it sounds better' — ask what changed in the meaning."]},
     transfer:{"when": "A later lesson, in a context where the ambiguity has real stakes.", "task": "Give ambiguous instructions, a menu, and a text message where a missing comma causes a genuine misunderstanding; ask them to fix each and state both possible meanings.", "lookFor": "Whether they reason about grouping and meaning rather than about pauses or appearance."},
     progression:{"preliminal": "Places commas by breath or by appearance; sees no difference in meaning between the two versions.", "liminal": "Accepts that a comma can change meaning in the demonstration sentence, but reverts to pause-based placement in own writing.", "crossed": "Uses commas to control grouping deliberately in lists, direct address, and joined ideas, and explains the meaning each creates.", "integrated": "Diagnoses and repairs ambiguity in unfamiliar text and makes deliberate punctuation choices for clarity in extended writing."},
@@ -616,6 +690,10 @@ const LIBRARY=[
     style:"threshold",
     match:["fraction","fractions","numerator","denominator","equivalent fraction","part of a whole","parts of a whole"],
     activityTitle:"Whose Half Is Bigger?",
+    sort:{"items": ["Half of an A4 sheet", "Half of a sticky note", "A quarter of an A3 sheet", "Half of this table", "A third of a chocolate bar", "A quarter of a much larger chocolate bar"], "task": "Make each of these for real, then sort them from smallest to largest — and explain why your order does not match the order of the fractions."},
+    poe:{"scenario": "One group cuts a large sheet in half; another cuts a small sticky note in half. Both halves are then held up side by side.", "tempting": "That the two halves will match, because a half is a half."},
+    counter:{"claim": "The bigger the bottom number, the smaller the piece.", "hunt": "Find two cases where a quarter is bigger than a half — then say what the claim forgot to mention."},
+    model:{"build": "Model each fraction as a paper strip with its whole always drawn around it, so the whole can never be forgotten.", "test": "Compare two fractions whose wholes are different sizes, and see whether the strips still let you decide."},
     liminal:{"looks": ["Compare fractions by comparing the digits alone", "Insist all halves are equal even when shown unequal wholes", "Cut a shape into unequal parts and still call them halves", "Go quiet when two correct answers appear to conflict"], "sounds": ["A half is always a half.", "But four is bigger than two, so a quarter is bigger.", "We're both right, so someone must have cheated.", "This is a trick question."], "hold": ["Do not say 'it depends on the whole'. Put both halves side by side and ask each group to state what they cut.", "Ask 'half of what?' every single time, and wait for the answer.", "Offer half of a small pizza against a quarter of a huge one, ask which they would rather have, then ask why their number rule failed.", "Let two correct-but-different answers sit unresolved for a while."]},
     transfer:{"when": "A later lesson, once 'half of what?' has become an automatic question.", "task": "Give real comparisons — half of one class's fundraising against a third of another's; a quarter off two differently priced items — and ask which is more, and how they know.", "lookFor": "Whether they ask what the whole is before comparing, and whether they cope with unequal wholes unprompted."},
     progression:{"preliminal": "Compares fractions by the digits alone; believes a half is a fixed amount.", "liminal": "Knows the whole matters in the demonstration but still compares by numerator or denominator when the wholes are not visible.", "crossed": "Asks what the whole is, and compares fractions correctly including when the wholes differ.", "integrated": "Reasons flexibly about parts and wholes in unfamiliar quantitative situations and explains why the same fraction can be different amounts."},
@@ -647,6 +725,10 @@ const LIBRARY=[
     style:"threshold",
     match:["force","forces","push","pull","balanced","unbalanced","net force","friction","gravity and motion"],
     activityTitle:"The Tug-of-War That Goes Nowhere",
+    sort:{"items": ["A book resting on a table", "A rope in a deadlocked tug-of-war", "A ball rolling to a stop", "A car speeding up", "A parachutist falling at a steady speed", "A puck sliding across ice"], "task": "Sort these into motion is changing and motion is staying the same — NOT into moving and still — then say what the forces must be doing in each pile."},
+    poe:{"scenario": "Two evenly matched teams pulling on a rope that does not move at all, and then one team letting go.", "tempting": "That nothing is happening while the rope is still, so there are no forces acting on it."},
+    counter:{"claim": "If something is moving, there must be a force pushing it along.", "hunt": "Find something moving at a steady speed with no push in the direction it is travelling — then say what the claim confused."},
+    model:{"build": "Model each situation with arrows drawn to scale for every push and pull, including the ones that are easy to forget.", "test": "Check whether your arrows cancel — and whether that matches whether the motion is actually changing."},
     liminal:{"looks": ["Say there is no force at all on a stationary object", "Look for a bigger force whenever something moves", "Treat a still object as force-free in their drawings", "Cannot explain why a moving object keeps moving"], "sounds": ["Nothing's pushing it, it's just sitting there.", "It stopped, so the force ran out.", "If both teams pull the same, neither is really pulling.", "Something has to keep pushing it or it'd stop."], "hold": ["Do not state the balanced-forces rule. Ask them to draw every push and pull on the still rope, then keep asking 'and what is that one balanced by?'", "Have two students pull hard and equally, and ask whether the forces are absent or cancelled.", "Ask what would happen the instant one side let go — and why that tells them the forces were there all along.", "Do not rescue the 'force runs out' idea — ask what would have to be true for it to be correct."]},
     transfer:{"when": "A later lesson, in situations with no rope and no tug-of-war.", "task": "Give a book resting on a table, a parachutist at terminal velocity, a car at a constant speed on a motorway, and a puck sliding on ice; ask which have balanced forces and how the motion shows it.", "lookFor": "Whether they infer balance from unchanging motion rather than from stillness — especially for things moving at a steady speed."},
     progression:{"preliminal": "Believes motion requires a continuing force, and that a still object has no forces acting on it.", "liminal": "Can say 'balanced forces' for the tug-of-war but still expects a net force wherever there is movement.", "crossed": "Uses balanced and unbalanced forces to explain both stillness and steady motion, and predicts changes correctly.", "integrated": "Applies the idea to unfamiliar cases including constant-speed motion and friction, linking change in motion to unbalanced force without prompting."},
@@ -678,6 +760,10 @@ const LIBRARY=[
     style:"threshold",
     match:["photosynthesis","chlorophyll","how plants make food","plants make food","plant food","glucose","how plants grow","where plants get mass"],
     activityTitle:"Where Does a Tree Come From?",
+    sort:{"items": ["Soil", "Water", "Air", "Sunlight", "Fertiliser", "The original seed"], "task": "Sort these into could supply the tree's mass and could not — then rank whatever survives by how much mass it could realistically provide."},
+    poe:{"scenario": "A potted plant grown for five years, where both the plant and the dried soil are weighed at the start and at the end.", "tempting": "That the soil will have lost roughly as much mass as the plant gained."},
+    counter:{"claim": "Plants get their food and their mass from the soil.", "hunt": "Find the measurement that breaks this claim — then work out, by elimination, where the mass must have come from instead."},
+    model:{"build": "Model the plant as a builder and each input as a delivery lorry, sizing every lorry by how much mass it actually delivers.", "test": "Weigh a balloon of carbon dioxide, then check whether the air lorry is really as empty as it looks."},
     liminal:{"looks": ["Return to soil and water no matter what the mass data shows", "Propose that the soil must have been replaced or the scales were wrong", "Accept the term carbon dioxide but keep explaining growth as feeding", "Recite the equation yet cannot say where the mass came from"], "sounds": ["It eats the soil.", "The gardener must have added more soil.", "Air weighs nothing though.", "It gets its food from its roots."], "hold": ["Do not hand them the equation. Return to the mass data: 'The soil lost almost nothing. The tree gained a great deal. Where did it come from?' — then wait through the silence.", "Have them find the mass of a balloon of carbon dioxide, so 'air weighs nothing' has to be given up first.", "Let the absurd-seeming answer be reached by elimination rather than announced by you.", "Ask them to name every place the mass could possibly have come from, then rule them out one at a time."]},
     transfer:{"when": "A later lesson, once mass-from-air is secure.", "task": "Ask where the mass of a burning log goes, where the carbon in a plank of wood originally came from, and what a forest does to the air over a century.", "lookFor": "Whether they track carbon through the system rather than restating the equation, and whether they link plant growth to atmospheric carbon."},
     progression:{"preliminal": "Explains plant growth as feeding on soil, water, or fertiliser; treats air as weightless nothing.", "liminal": "Repeats the photosynthesis equation but still reaches for the soil when asked where the mass came from.", "crossed": "Explains that most of the plant's mass is built from carbon dioxide, using the mass evidence to justify it.", "integrated": "Traces carbon through growth, burning, and the atmosphere, and applies the idea to unfamiliar ecological questions."},
@@ -710,6 +796,10 @@ const LIBRARY=[
     style:"threshold",
     match:["solution","solute","solvent","dissolve","dissolving","concentration","concentrated","saturated","mixture"],
     activityTitle:"Name the Vanishing: Solutions from Scratch",
+    sort:{"items": ["Sugar stirred into warm water", "Sand stirred into water", "Salt added to cold water until no more will go in", "Food colouring in water", "Chalk dust in water", "Sugar stirred into hot water"], "task": "Sort these by what happens to the added substance, then sort them again by whether the mixture stops accepting more — and name what your second sort is tracking."},
+    poe:{"scenario": "A spoonful of sugar stirred into water, with the whole beaker weighed before and after.", "tempting": "That the mass will drop, because the sugar has gone."},
+    counter:{"claim": "If you keep stirring, any amount of sugar will eventually dissolve.", "hunt": "Find the point where it stops — then find the change that makes stirring work again, and say what the claim ignored."},
+    model:{"build": "Model the water as a car park with a fixed number of spaces, and the solute as cars looking for one.", "test": "Ask what heating does to the car park, then check it against how much extra sugar hot water really takes."},
     liminal:{"looks": ["Say the solute is gone or has become the liquid", "Expect the mass to drop after dissolving", "Keep adding solute past saturation, expecting it to disappear too", "Treat 'strong' and 'a lot of liquid' as the same thing"], "sounds": ["It disappeared.", "It turned into water.", "It's gone, so it must weigh less now.", "Why won't any more go in? It's broken."], "hold": ["Do not say 'dissolved, not destroyed'. Weigh before and after, let the unchanged number contradict them, then ask what that means.", "Ask 'if it's gone, why is it still sweet?' and wait.", "When they hit saturation, do not explain it — ask them to predict what heating will do and let them find that the limit moves.", "Ask them to draw where the solute is now, at the smallest scale they can imagine."]},
     transfer:{"when": "A later lesson, in everyday and industrial contexts.", "task": "Ask why sugar dissolves faster in hot tea, why cooling syrup grows crystals, why salt is spread on icy roads, and why a fizzy drink goes flat faster when warm.", "lookFor": "Whether they use concentration and a temperature-dependent limit, rather than 'it disappears' or 'heat makes things faster'."},
     progression:{"preliminal": "Believes the solute disappears or turns into the liquid; expects the mass to decrease.", "liminal": "Accepts that the solute is still present but cannot yet link concentration to amount, or explain why dissolving stops.", "crossed": "Explains concentration as solute per amount of solvent, and predicts that heating raises how much will dissolve.", "integrated": "Applies concentration and saturation to unfamiliar situations including crystallisation and gases, reasoning about the particle-level picture."},
@@ -962,10 +1052,17 @@ function buildPrompt(concept,ageStr,subject,duration,style,move){
   const subjectLine=subject?`Subject area: ${subject}.`:"";
   const durationLine=duration?`Target class duration: ${duration}. Distribute time across the 5 phases so the total is close to this.`:"Total lesson roughly 45–60 minutes; distribute across the phases.";
   const thrCommon=` THRESHOLD MODE (very important). This is a threshold concept: it contains "troublesome knowledge" that clashes with students' intuition and, once grasped, transforms how they see the topic. You MUST include: "troublesome" (one sentence naming the counter-intuitive idea learners get stuck on) and "rule" (one sentence stating the generalisation students should end up with, in plain language).  You MUST also include: "liminal" — an object with "looks" (3-4 observable behaviours of a student who is stuck on THIS concept), "sounds" (3-4 things such a student actually says, written as plain sentences without quotation marks) and "hold" (3-4 specific teacher moves that keep students productively stuck rather than rescuing them with the answer — each must say what NOT to give away); "progression" — an object with "preliminal", "liminal", "crossed" and "integrated", each one sentence describing what a student at that stage looks like FOR THIS CONCEPT (not generic); and "transfer" — an object with "when" (why it is deferred and how much later), "task" (2-3 unfamiliar situations needing the same idea but looking nothing like the original investigation) and "lookFor" (what tells you the idea has genuinely transferred). SEQUENCING RULE: do NOT treat ENGAGE as a separate hook — engagement must sit INSIDE the construction, i.e. curiosity arises from meeting the phenomenon while students build meaning. Keep TRANSFER for later: ELABORATE should be framed as a follow-up/later-lesson application, not crammed in immediately.`;
-  const thrWords=` CONSTRUCTION MOVE = INVENT-THE-WORDS. During EXPLORE students INVENT their OWN brand-new made-up names for each core part (not the real words, not etymology) and reason using ONLY their invented words. In EXPLAIN, reveal the formal term for each and map it onto the invented word. Include a "lexicon" array (2-5 items) of objects with "slot" (short description of the thing students name) and "reveal" (the formal term).`;
-  const thrRule=` CONSTRUCTION MOVE = GENERATE-THE-RULE. During EXPLORE students gather evidence and, before any rule is told to them, WRITE THEIR OWN general statement of what always happens (a conjecture). In EXPLAIN they compare their generalisation with the formal "rule" and refine it. Include an empty "lexicon":[] array. Explore's teacherInstructions MUST have students form and record their own rule from evidence; Explain MUST compare student rule to the formal rule.`;
-  const thr=(style==="threshold")?(thrCommon+(move==="rule"?thrRule:thrWords)):"";
-  const lexSchema=(style==="threshold")?`"troublesome":"","rule":"","liminal":{"looks":[],"sounds":[],"hold":[]},"progression":{"preliminal":"","liminal":"","crossed":"","integrated":""},"transfer":{"when":"","task":"","lookFor":""},"lexicon":[{"slot":"","reveal":""}],`:"";
+  const MOVESPEC={
+    words:{ins:` CONSTRUCTION MOVE = INVENT-THE-WORDS. During EXPLORE students INVENT their OWN brand-new made-up names for each core part (not the real words, not etymology) and reason using ONLY their invented words. In EXPLAIN, reveal the formal term for each and map it onto the word students already invented. Include a "lexicon" array (2-5 items) of objects with "slot" and "reveal".`,schema:`"lexicon":[{"slot":"","reveal":""}],`},
+    rule:{ins:` CONSTRUCTION MOVE = GENERATE-THE-RULE. During EXPLORE students gather evidence and, before any rule is told to them, WRITE THEIR OWN general statement of what always happens. In EXPLAIN they compare their generalisation with the formal "rule" and refine it.`,schema:``},
+    sort:{ins:` CONSTRUCTION MOVE = SORT AND CLASSIFY. During EXPLORE students receive a set of cases and must build the CATEGORIES THEMSELVES — the teacher must not supply them. Include "sort" with "items" (5-8 short concrete cases, deliberately chosen so the intuitive sort and the conceptually correct sort DISAGREE) and "task" (one sentence telling students to group, name their groups, and state the rule for the boundary).`,schema:`"sort":{"items":[],"task":""},`},
+    poe:{ins:` CONSTRUCTION MOVE = PREDICT-OBSERVE-EXPLAIN. During EXPLORE students must commit a prediction to writing BEFORE observing. Include "poe" with "scenario" (one specific, demonstrable situation whose outcome contradicts intuition) and "tempting" (the wrong prediction most students will make, and why it feels right — this is a teacher note).`,schema:`"poe":{"scenario":"","tempting":""},`},
+    counter:{ins:` CONSTRUCTION MOVE = FIND THE COUNTER-EXAMPLE. Students are handed an almost-right claim — ideally the very misconception named in "troublesome" — and must break it. Include "counter" with "claim" (the plausible but wrong generalisation, in students' own likely words) and "hunt" (the case they must find, and the repair they must then make to the claim).`,schema:`"counter":{"claim":"","hunt":""},`},
+    model:{ins:` CONSTRUCTION MOVE = BUILD A MODEL. Students build a physical or drawn model of the mechanism, then deliberately find where it breaks. Include "model" with "build" (what concrete thing they construct, from simple classroom materials) and "test" (the case that probes the model's limits).`,schema:`"model":{"build":"","test":""},`}
+  };
+  const MS=MOVESPEC[move]||MOVESPEC.words;
+  const thr=(style==="threshold")?(thrCommon+MS.ins):"";
+  const lexSchema=(style==="threshold")?(`"troublesome":"","rule":"","liminal":{"looks":[],"sounds":[],"hold":[]},"progression":{"preliminal":"","liminal":"","crossed":"","integrated":""},"transfer":{"when":"","task":"","lookFor":""},`+MS.schema):"";
   return `You are an expert instructional designer creating a CONSTRUCTIVIST, INQUIRY-BASED classroom activity for a teacher.
 
 Concept to teach: "${concept}"
@@ -1066,12 +1163,12 @@ function refreshKeybar(){
 
 /* ---------- examples ---------- */
 const EXAMPLES=[
-  {c:"Solutions — name the liquid, the solute, and the mixture yourself",a:"Grade 7 (age 12)",s:"Science",st:"threshold"},
-  {c:"Fractions — whose half is bigger?",a:"Grade 4 (age 9)",s:"Math",st:"threshold"},
-  {c:"Forces — the tug-of-war that goes nowhere",a:"Grade 5 (age 10)",s:"Science",st:"threshold"},
-  {c:"Photosynthesis — where does a tree come from?",a:"Grade 7 (age 12)",s:"Science",st:"threshold"},
-  {c:"Metaphor — how is the classroom a zoo?",a:"Grade 6 (age 11)",s:"English",st:"threshold"},
-  {c:"Adjectives — the words that change the picture",a:"Grade 3 (age 8)",s:"English",st:"threshold"},
+  {c:"Solutions — name the liquid, the solute, and the mixture yourself",a:"Grade 7 (age 12)",s:"Science",st:"threshold",mv:"words"},
+  {c:"Fractions — whose half is bigger?",a:"Grade 4 (age 9)",s:"Math",st:"threshold",mv:"counter"},
+  {c:"Forces — the tug-of-war that goes nowhere",a:"Grade 5 (age 10)",s:"Science",st:"threshold",mv:"poe"},
+  {c:"Photosynthesis — where does a tree come from?",a:"Grade 7 (age 12)",s:"Science",st:"threshold",mv:"sort"},
+  {c:"Metaphor — how is the classroom a zoo?",a:"Grade 6 (age 11)",s:"English",st:"threshold",mv:"model"},
+  {c:"Adjectives — the words that change the picture",a:"Grade 3 (age 8)",s:"English",st:"threshold",mv:"rule"},
   {c:"Triangle inequality — can any 3 side lengths form a triangle?",a:"Grade 6 (age 11)",s:"Math"},
   {c:"Why do we have seasons?",a:"Grade 4 (age 9)",s:"Science"},
   {c:"What makes an experiment a fair test?",a:"Grade 5 (age 10)",s:"Science"},
@@ -1087,6 +1184,7 @@ function buildChips(){
     const e=EXAMPLES[+ch.dataset.i];
     $("#concept").value=e.c; $("#age").value=e.a; $("#subject").value=e.s;
     setStyle(e.st||"5e");
+    if(e.st==="threshold") setMove(e.mv||"words");
     generate(e.c,e.a,e.s,"");
   });
 }
@@ -1138,16 +1236,23 @@ function setStyle(s){
   document.querySelectorAll("#styleSeg button").forEach(b=>b.classList.toggle("on",b.dataset.style===activityStyle));
   const n=$("#styleNote"); if(n) n.textContent=activityStyle==="threshold"?"Names the troublesome knowledge, then students construct meaning first — either inventing their own words or forming the rule. Engagement lives inside the construction; transfer comes in a later lesson.":"A driving question with a hands-on 5E investigation.";
   const ms=$("#moveSeg"); if(ms) ms.classList.toggle("hidden",activityStyle!=="threshold");
-  const mn=$("#moveNote"); if(mn) mn.textContent=(activityStyle!=="threshold")?"":(thresholdMove==="rule"?"Students gather evidence and write their own generalisation before the formal rule is revealed.":"Students coin their own made-up word for each part before any formal term is introduced.");
+  const mn=$("#moveNote"); if(mn) mn.textContent=(activityStyle!=="threshold")?"":((MOVES.find(x=>x.k===thresholdMove)||MOVES[0]).note);
+}
+function buildMoves(){
+  const ms=$("#moveSeg"); if(!ms) return;
+  ms.innerHTML=MOVES.map(m=>`<button type="button" data-move="${m.k}"${m.k===thresholdMove?' class="on"':''}>${esc(m.label)}</button>`).join("");
+  ms.querySelectorAll("button").forEach(b=>b.onclick=()=>setMove(b.dataset.move));
 }
 function setMove(m){
-  thresholdMove=(m==="rule")?"rule":"words";
+  const mv=MOVES.find(x=>x.k===m)||MOVES[0];
+  thresholdMove=mv.k;
   document.querySelectorAll("#moveSeg button").forEach(b=>b.classList.toggle("on",b.dataset.move===thresholdMove));
-  const mn=$("#moveNote"); if(mn) mn.textContent=thresholdMove==="rule"?"Students gather evidence and write their own generalisation before the formal rule is revealed.":"Students coin their own made-up word for each part before any formal term is introduced.";
-  if(lastActivity&&(activityStyle==="threshold")) renderActivity(lastActivity);
+  const mn=$("#moveNote"); if(mn) mn.textContent=mv.note;
+  if(lastActivity&&activityStyle==="threshold") renderActivity(lastActivity);
 }
+
 document.querySelectorAll("#styleSeg button").forEach(b=>b.onclick=()=>setStyle(b.dataset.style));
-document.querySelectorAll("#moveSeg button").forEach(b=>b.onclick=()=>setMove(b.dataset.move));
+buildMoves();
 buildChips(); refreshKeybar(); setStyle("5e");
 </script>
 </body>
